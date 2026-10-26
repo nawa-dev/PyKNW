@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PyKNW Studio - โปรแกรมเขียนโค้ดภาษา Python สำหรับการเรียนรู้</title>
+  <link rel="icon" type="image/x-icon" href="images/PyKNW.ico">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-content">
+      <a href="#" class="nav-brand">
+        <img src="images/PyKNW.png" alt="PyKNW Logo" class="nav-logo">
+        <span class="nav-title">PyKNW Studio</span>
+        <span class="nav-badge" id="versionBadge">v1.1.1</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="#features" class="nav-link">คุณสมบัติ</a>
+        <a href="#requirements" class="nav-link">ความต้องการระบบ</a>
+        <a href="https://github.com/nawa-dev/PyKNW" target="_blank" rel="noopener" class="nav-btn-gh">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero-section">
+    <div class="hero-glow"></div>
+    <div class="container hero-content">
+      <div class="hero-pill">
+        <span class="pill-dot"></span>
+        <span>Python Studio ครบวงจรเพื่อการศึกษาและผู้เริ่มต้น</span>
+      </div>
+
+      <h1 class="hero-title">
+        เขียนโค้ด Python ได้ทันที<br>
+        <span class="hero-title-highlight">โดยไม่ต้องติดตั้ง Python ลงเครื่อง</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        โปรแกรม Code Editor น้ำหนักเบา ออกแบบมาเพื่อการเรียนการสอนภาษา Python โดยเฉพาะ พร้อมฟังก์ชันรับค่าอินพุต input(), รองรับกราฟิก GUI ด้วย Tkinter ในตัว, ระบบไฮไลต์การทำงานทีละบรรทัด และระบบอธิบายข้อผิดพลาดภาษาไทย
+      </p>
+
+      <div class="hero-actions">
+        <div class="download-btn-wrapper">
+          <a id="btnDirectDownload" href="https://github.com/nawa-dev/PyKNW/releases/latest" class="btn-primary-download" title="ดาวน์โหลดตัวติดตั้งสำหรับ Windows">
+            <div class="btn-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </div>
+            <div class="btn-text-group">
+              <span class="btn-main-text">ดาวน์โหลดสำหรับ Windows</span>
+              <span class="btn-sub-text" id="downloadMeta">กำลังดึงข้อมูลเวอร์ชันล่าสุด...</span>
+            </div>
+          </a>
+          <span class="download-hint">รองรับ Windows 10 และ Windows 11 (64-bit) • ฟรีและโอเพนซอร์ส</span>
+        </div>
+      </div>
+
+      <!-- App Interface Preview Mockup -->
+      <div class="preview-container">
+        <div class="mockup-header">
+          <div class="mockup-controls">
+            <div class="mockup-dot red"></div>
+            <div class="mockup-dot yellow"></div>
+            <div class="mockup-dot green"></div>
+          </div>
+          <div class="mockup-tabs">
+            <div class="mockup-tab">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <span>main.pyknw</span>
+            </div>
+          </div>
+          <div class="mockup-actions">
+            <div class="mockup-btn">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>รัน</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mockup-body">
+          <div class="mockup-editor">
+            <div><span class="token-comment"># PyKNW Studio - เริ่มต้นเขียน Python ได้ทันที</span></div>
+            <div><span class="token-keyword">def</span> <span class="token-function">calculate_score</span>(name, score):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="token-keyword">if</span> score &gt;= <span class="token-number">50</span>:</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="token-keyword">return</span> <span class="token-string">f"ยินดีด้วยคุณ {name} สอบผ่าน!"</span></div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="token-keyword">return</span> <span class="token-string">f"พยายามอีกนิดคุณ {name} สอบไม่ผ่าน"</span></div>
+            <br>
+            <div>name = <span class="token-function">input</span>(<span class="token-string">"กรุณากรอกชื่อ: "</span>)</div>
+            <div>result = <span class="token-function">calculate_score</span>(name, <span class="token-number">85</span>)</div>
+            <div><span class="token-function">print</span>(result)</div>
+          </div>
+
+          <div class="mockup-console">
+            <div class="console-title">คอนโซลแสดงผล (Output Terminal)</div>
+            <div>กรุณากรอกชื่อ: สมชาย</div>
+            <div class="console-output-text">ยินดีด้วยคุณ สมชาย สอบผ่าน!</div>
+            <div>[จบการทำงาน - รหัสสถานะ 0]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Features Section -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">คุณสมบัติเด่น</div>
+        <h2 class="section-title">เครื่องมือที่คิดค้นมาเพื่อห้องเรียนและการฝึกเขียนโค้ด</h2>
+        <p class="section-desc">ออกแบบมาเพื่อแก้ไขปัญหาความยุ่งยากในการติดตั้งโปรแกรม ลดอุปสรรคสำหรับผู้เริ่มต้น และช่วยให้การเรียนการสอนดำเนินไปได้อย่างราบรื่น</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">มี Python 3.10 ในตัว</h3>
+          <p class="feature-card-desc">บรรจุตัวรันไทม์ Python Embeddable มาพร้อมในตัวเครื่อง สามารถเปิดโปรแกรมและสั่งรันโค้ดได้ทันทีโดยไม่ต้องติดตั้งหรือตั้งค่า Environment Variable ให้ยุ่งยาก</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">รองรับ GUI ด้วย Tkinter</h3>
+          <p class="feature-card-desc">มาพร้อมโมดูล Tcl/Tk เต็มรูปแบบ สามารถเขียนโปรแกรมสร้างหน้าต่าง Desktop GUI ปุ่มกด กล่องข้อความ และกราฟิก Canvas ได้ทันทีโดยไม่ต้องลงไลบรารีเสริม</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">Interactive Console Input</h3>
+          <p class="feature-card-desc">มีช่องส่งค่าอินพุตสำหรับฟังก์ชัน input() ในตัว แสดงข้อความ Prompt แบบเรียลไทม์ และส่งค่าด้วยปุ่ม Enter ช่วยให้การฝึกเขียนโปรแกรมแบบโต้ตอบสะดวกสบาย</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">คำอธิบาย Error ภาษาไทย</h3>
+          <p class="feature-card-desc">ระบบวิเคราะห์และแปลข้อผิดพลาดที่พบบ่อย (เช่น SyntaxError, IndentationError, NameError) เป็นภาษาไทยเข้าใจง่าย ชี้ตำแหน่งบรรทัดชัดเจน</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">Step Delay Highlighter</h3>
+          <p class="feature-card-desc">โหมดหน่วงเวลาแสดงไฮไลต์ทีละบรรทัดขณะโปรแกรมกำลังทำงาน ช่วยให้ผู้เรียนมองเห็นลำดับการทำงานของ Loop, เงื่อนไข และฟังก์ชันได้อย่างเป็นรูปธรรม</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">ระบบความปลอดภัยไฟล์ .pyknw</h3>
+          <p class="feature-card-desc">ลงลายเซ็นดิจิทัล HMAC-SHA256 ป้องกันการเปิดดัดแปลงหรือวางโค้ดจากโปรแกรมภายนอก เพื่อส่งเสริมให้ผู้เรียนได้ฝึกฝนการพิมพ์โค้ดด้วยตนเอง</p>
+        </div>
+
+        <!-- Feature 7 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">รองรับทั้งธีมมืดและธีมสว่าง</h3>
+          <p class="feature-card-desc">สลับระหว่าง Dark Mode และ Light Mode ได้อย่างง่ายดายด้วยปุ่มเดียว พร้อมการผสานกับ Monaco Editor อย่างสมบูรณ์แบบเพื่อการอ่านโค้ดที่สบายตา</p>
+        </div>
+
+        <!-- Feature 8 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">อัปเดตอัตโนมัติในตัว</h3>
+          <p class="feature-card-desc">ตรวจสอบเวอร์ชันใหม่จาก GitHub Releases เมื่อเริ่มโปรแกรม พร้อมให้คุณดาวน์โหลดและติดตั้งตัวอัปเดตได้โดยตรงทันทีจากภายในโปรแกรม</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- System Requirements Section -->
+  <section class="specs-section" id="requirements">
+    <div class="container">
+      <div class="specs-card">
+        <h3 class="specs-card-title">ความต้องการของระบบ (System Requirements)</h3>
+        <div class="specs-grid">
+          <div class="spec-item">
+            <span class="spec-label">ระบบปฏิบัติการ</span>
+            <span class="spec-value">Windows 10 / Windows 11 (64-bit)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">หน่วยความจำ (RAM)</span>
+            <span class="spec-value">ขั้นต่ำ 2 GB (แนะนำ 4 GB ขึ้นไป)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">พื้นที่ว่างบนฮาร์ดดิสก์</span>
+            <span class="spec-value">ประมาณ 350 MB (รวมตัวรันไทม์ Python)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">สิทธิ์การติดตั้ง</span>
+            <span class="spec-value">ไม่ต้องใช้สิทธิ์ Administrator ในการใช้งาน</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- In-Page Download Toast Notification -->
+  <div id="downloadToast" class="download-toast" role="alert">
+    <div class="toast-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+    </div>
+    <div class="toast-content">
+      <span class="toast-title">กำลังดาวน์โหลดตัวติดตั้ง</span>
+      <span class="toast-desc" id="toastDesc">เริ่มการดาวน์โหลดแล้ว ตรวจสอบที่แถบดาวน์โหลดของเบราว์เซอร์</span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>PyKNW Studio • พัฒนาโดย <a href="https://github.com/nawa-dev" target="_blank" rel="noopener">Nawa Phansaen</a></p>
+      <p style="margin-top: 6px; font-size: 12px; color: #71717a;">ซอฟต์แวร์โอเพนซอร์สภายใต้สัญญาอนุญาต MIT License</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
