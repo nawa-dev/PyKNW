@@ -1026,22 +1026,53 @@ if (btnThemeToggle) btnThemeToggle.addEventListener('click', toggleTheme);
 btnClear.addEventListener('click', clearOutput);
 btnToggleLayout.addEventListener('click', toggleConsoleLayout);
 
-// Allow dropping onto empty space in tabs container (moves dragged tab to the end)
-tabsContainer.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-});
+// Allow dropping onto empty space in tabs container or header (moves dragged tab to the end)
+const tabsHeaderEl = document.querySelector('.tabs-header');
 
-tabsContainer.addEventListener('drop', (e) => {
-  if (e.target === tabsContainer && draggedTabId) {
+if (tabsHeaderEl) {
+  tabsHeaderEl.addEventListener('dragover', (e) => {
+    if (!draggedTabId) return;
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
+    // If mouse is not over a specific .code-tab (i.e. empty bar or new tab button)
+    const tabEl = e.target.closest('.code-tab');
+    if (!tabEl) {
+      clearTabDropIndicators();
+      const allTabs = tabsContainer.querySelectorAll('.code-tab');
+      if (allTabs.length > 0) {
+        const lastTab = allTabs[allTabs.length - 1];
+        if (lastTab.dataset.tabId !== draggedTabId) {
+          lastTab.classList.add('drop-indicator-right');
+        }
+      }
+    }
+  });
+
+  tabsHeaderEl.addEventListener('dragleave', (e) => {
+    if (!tabsHeaderEl.contains(e.relatedTarget)) {
+      clearTabDropIndicators();
+    }
+  });
+
+  tabsHeaderEl.addEventListener('drop', (e) => {
+    if (!draggedTabId) return;
+    e.preventDefault();
+    clearTabDropIndicators();
+
     const fromIndex = tabs.findIndex(t => t.id === draggedTabId);
     if (fromIndex !== -1 && fromIndex !== tabs.length - 1) {
       const [movedTab] = tabs.splice(fromIndex, 1);
       tabs.push(movedTab);
       renderTabs();
     }
-  }
+  });
+}
+
+// Global cleanup when drag ends (including Esc cancellation)
+window.addEventListener('dragend', () => {
+  draggedTabId = null;
+  clearTabDropIndicators();
 });
 
 if (btnConsoleZoomIn) btnConsoleZoomIn.addEventListener('click', zoomConsoleInOnly);
