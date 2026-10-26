@@ -1,10 +1,10 @@
-# 📋 ข้อกำหนดและข้อห้ามในการพัฒนา (Design & Coding Rules)
+#  ข้อกำหนดและข้อห้ามในการพัฒนา (Design & Coding Rules)
 
 โปรเจกต์นี้มีข้อกำหนดด้านดีไซน์และมาตรฐานโค้ดที่ต้องปฏิบัติตามอย่างเคร่งครัด ดังนี้:
 
 ---
 
-### 1. 🚫 ห้ามใช้ Emoji เด็ดขาด (Strictly No Emojis)
+### 1.  ห้ามใช้ Emoji เด็ดขาด (Strictly No Emojis)
 - **ห้ามมีตัวอักษร Emoji** ในทุกส่วนของระบบ ไม่ว่าจะเป็น:
   - หน้าต่าง UI, ป้ายชื่อ (Title), ป้ายกำกับ (Labels)
   - ข้อความแจ้งเตือน (Toasts, Alerts, Notifications)
@@ -14,7 +14,7 @@
 
 ---
 
-### 2. 🔲 รูปแบบปุ่มกดต้องเป็น Flat Text Button (Flat Buttons Rule)
+### 2.  รูปแบบปุ่มกดต้องเป็น Flat Text Button (Flat Buttons Rule)
 - ปุ่มกดทั่วไปทั้งหมดในระบบ (Toolbar, Tabs, Console Actions, Dialog Buttons ทั่วไป) ต้องใช้สไตล์ **Flat Text Button**:
   - **สถานะปกติ:** พื้นหลังโปร่งใส (`background: transparent`), ไม่มีเส้นขอบ (`border: none`), ไม่มี Outline หรือกรอบสี่เหลี่ยมแยกแต่ละปุ่ม
   - **สถานะ Hover:** แสดงพื้นหลังสีเทาอ่อนจางๆ (`background: rgba(255, 255, 255, 0.08)`) พร้อม Transition ที่นุ่มนวล

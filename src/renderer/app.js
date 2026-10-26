@@ -28,6 +28,7 @@ const runStopIcon = document.getElementById('runStopIcon');
 const runStopText = document.getElementById('runStopText');
 const btnTraceSpeed = document.getElementById('btnTraceSpeed');
 const traceSpeedLabel = document.getElementById('traceSpeedLabel');
+const btnThemeToggle = document.getElementById('btnThemeToggle');
 const btnClear = document.getElementById('btnClear');
 const btnConsoleZoomIn = document.getElementById('btnConsoleZoomIn');
 const btnConsoleZoomOut = document.getElementById('btnConsoleZoomOut');
@@ -54,6 +55,45 @@ const winMaxIcon = document.getElementById('winMaxIcon');
 const winCloseBtn = document.getElementById('winCloseBtn');
 
 // ==========================================
+// Theme Management (Dark / Light Theme Toggle)
+// ==========================================
+let currentTheme = localStorage.getItem('pyknw_theme') || 'dark';
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('pyknw_theme', theme);
+
+  if (editor && typeof monaco !== 'undefined') {
+    monaco.editor.setTheme(theme === 'light' ? 'vs' : 'vs-dark');
+  }
+
+  const sunIcon = document.getElementById('themeIconSun');
+  const moonIcon = document.getElementById('themeIconMoon');
+  const toggleText = document.getElementById('themeToggleText');
+  const toggleBtn = document.getElementById('btnThemeToggle');
+
+  if (theme === 'light') {
+    if (sunIcon) sunIcon.style.display = 'none';
+    if (moonIcon) moonIcon.style.display = 'inline-block';
+    if (toggleText) toggleText.textContent = 'มืด';
+    if (toggleBtn) toggleBtn.title = 'เปลี่ยนเป็นธีมมืด';
+  } else {
+    if (sunIcon) sunIcon.style.display = 'inline-block';
+    if (moonIcon) moonIcon.style.display = 'none';
+    if (toggleText) toggleText.textContent = 'สว่าง';
+    if (toggleBtn) toggleBtn.title = 'เปลี่ยนเป็นธีมสว่าง';
+  }
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+}
+
+// Apply saved theme immediately for fast load
+applyTheme(currentTheme);
+
+// ==========================================
 // Initialize Monaco Editor & Application
 // ==========================================
 require.config({ paths: { vs: '../../node_modules/monaco-editor/min/vs' } });
@@ -64,7 +104,7 @@ require(['vs/editor/editor.main'], function () {
 
   // 2. Create Monaco Editor instance
   editor = monaco.editor.create(document.getElementById('editorContainer'), {
-    theme: 'vs-dark',
+    theme: currentTheme === 'light' ? 'vs' : 'vs-dark',
     automaticLayout: true,
     fontSize: currentFontSize,
     fontFamily: 'Consolas, "Courier New", monospace',
@@ -219,6 +259,14 @@ function closeTab(tabId, e) {
   }
 }
 
+let draggedTabId = null;
+
+function clearTabDropIndicators() {
+  document.querySelectorAll('.code-tab').forEach(el => {
+    el.classList.remove('drop-indicator-left', 'drop-indicator-right', 'tab-dragging');
+  });
+}
+
 function renderTabs() {
   tabsContainer.innerHTML = '';
 
@@ -227,6 +275,69 @@ function renderTabs() {
     const tamperedClass = tab.isTampered ? 'tampered' : '';
     tabEl.className = `code-tab ${tab.id === activeTabId ? 'active' : ''} ${tab.isDirty ? 'dirty' : ''} ${tamperedClass}`;
     tabEl.onclick = () => switchTab(tab.id);
+
+    // Enable HTML5 Drag & Drop for reordering
+    tabEl.setAttribute('draggable', 'true');
+    tabEl.dataset.tabId = tab.id;
+
+    tabEl.addEventListener('dragstart', (e) => {
+      draggedTabId = tab.id;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', tab.id);
+      setTimeout(() => {
+        tabEl.classList.add('tab-dragging');
+      }, 0);
+    });
+
+    tabEl.addEventListener('dragend', () => {
+      draggedTabId = null;
+      clearTabDropIndicators();
+    });
+
+    tabEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (!draggedTabId || draggedTabId === tab.id) return;
+
+      const rect = tabEl.getBoundingClientRect();
+      const midPoint = rect.left + rect.width / 2;
+      clearTabDropIndicators();
+      if (e.clientX < midPoint) {
+        tabEl.classList.add('drop-indicator-left');
+      } else {
+        tabEl.classList.add('drop-indicator-right');
+      }
+    });
+
+    tabEl.addEventListener('dragleave', (e) => {
+      if (!tabEl.contains(e.relatedTarget)) {
+        tabEl.classList.remove('drop-indicator-left', 'drop-indicator-right');
+      }
+    });
+
+    tabEl.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const sourceId = draggedTabId || e.dataTransfer.getData('text/plain');
+      clearTabDropIndicators();
+
+      if (!sourceId || sourceId === tab.id) return;
+
+      const fromIndex = tabs.findIndex(t => t.id === sourceId);
+      if (fromIndex === -1) return;
+
+      const rect = tabEl.getBoundingClientRect();
+      const isAfter = e.clientX >= (rect.left + rect.width / 2);
+
+      const [movedTab] = tabs.splice(fromIndex, 1);
+      let targetIndex = tabs.findIndex(t => t.id === tab.id);
+      if (isAfter) {
+        targetIndex += 1;
+      }
+      tabs.splice(targetIndex, 0, movedTab);
+
+      renderTabs();
+    });
 
     const iconSpan = document.createElement('span');
     iconSpan.className = 'tab-file-icon';
@@ -246,8 +357,10 @@ function renderTabs() {
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'tab-close-btn';
+    closeBtn.setAttribute('draggable', 'false');
     closeBtn.title = 'ปิดแท็บ (Ctrl+W)';
     closeBtn.innerHTML = `<svg width="10" height="10" viewBox="0 0 12 12"><polygon fill="currentColor" points="11 1.41 9.59 0 5.5 4.09 1.41 0 0 1.41 4.09 5.5 0 9.59 1.41 11 5.5 6.91 9.59 11 11 9.59 6.91 5.5"></polygon></svg>`;
+    closeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
     closeBtn.onclick = (e) => closeTab(tab.id, e);
 
     tabEl.appendChild(iconSpan);
@@ -909,8 +1022,27 @@ btnSave.addEventListener('click', () => saveCurrentFile(false));
 if (btnSaveAs) btnSaveAs.addEventListener('click', () => saveCurrentFile(true));
 if (btnRunStop) btnRunStop.addEventListener('click', () => { if (isRunning) stopCode(); else runCode(); });
 if (btnTraceSpeed) btnTraceSpeed.addEventListener('click', cycleTraceSpeed);
+if (btnThemeToggle) btnThemeToggle.addEventListener('click', toggleTheme);
 btnClear.addEventListener('click', clearOutput);
 btnToggleLayout.addEventListener('click', toggleConsoleLayout);
+
+// Allow dropping onto empty space in tabs container (moves dragged tab to the end)
+tabsContainer.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+});
+
+tabsContainer.addEventListener('drop', (e) => {
+  if (e.target === tabsContainer && draggedTabId) {
+    e.preventDefault();
+    const fromIndex = tabs.findIndex(t => t.id === draggedTabId);
+    if (fromIndex !== -1 && fromIndex !== tabs.length - 1) {
+      const [movedTab] = tabs.splice(fromIndex, 1);
+      tabs.push(movedTab);
+      renderTabs();
+    }
+  }
+});
 
 if (btnConsoleZoomIn) btnConsoleZoomIn.addEventListener('click', zoomConsoleInOnly);
 if (btnConsoleZoomOut) btnConsoleZoomOut.addEventListener('click', zoomConsoleOutOnly);
