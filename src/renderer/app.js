@@ -42,6 +42,7 @@ const btnSendInput = document.getElementById('btnSendInput');
 const editorCursorEl = document.getElementById('editorCursor');
 const editorZoomEl = document.getElementById('editorZoom');
 const tabCountStatusEl = document.getElementById('tabCountStatus');
+const appVersionStatus = document.getElementById('appVersionStatus');
 const panelResizer = document.getElementById('panelResizer');
 
 // Window Control Elements
@@ -1041,3 +1042,24 @@ window.addEventListener('keydown', (e) => {
     }
   }
 });
+
+// Initialize App Version in Status Bar
+if (window.pyknwAPI && window.pyknwAPI.getAppVersion) {
+  window.pyknwAPI.getAppVersion().then(ver => {
+    if (appVersionStatus && ver) {
+      appVersionStatus.textContent = `v${ver}`;
+    }
+  }).catch(() => {});
+}
+
+// Click version in Status Bar to check for updates or open update modal
+if (appVersionStatus) {
+  appVersionStatus.addEventListener('click', () => {
+    if (availableUpdateInfo) {
+      showUpdateModal(availableUpdateInfo);
+    } else if (window.pyknwAPI && window.pyknwAPI.checkForUpdates) {
+      showToast('กำลังตรวจสอบการอัปเดตเวอร์ชันล่าสุด...', 'info', 2000);
+      window.pyknwAPI.checkForUpdates();
+    }
+  });
+}

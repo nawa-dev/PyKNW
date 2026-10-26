@@ -746,6 +746,20 @@ html, body {
   color: #383842;
 }
 
+.status-version {
+  cursor: pointer;
+  padding: 1px 5px;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.status-version:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--accent-blue);
+}
+
 /* ==================================================== */
 /* Toast Notifications                                  */
 /* ==================================================== */

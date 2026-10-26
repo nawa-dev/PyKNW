@@ -174,6 +174,11 @@ ipcMain.handle('window:is-maximized', () => {
   return mainWindow ? mainWindow.isMaximized() : false;
 });
 
+// IPC Handler: App Version
+ipcMain.handle('app:get-version', () => {
+  return app.getVersion();
+});
+
 // IPC Handler: Python Info
 ipcMain.handle('python:get-info', async () => {
   const pyPath = getBundledPythonPath();

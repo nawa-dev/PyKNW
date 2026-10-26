@@ -46,6 +46,7 @@ contextBridge.exposeInMainWorld('pyknwAPI', {
   },
 
   // App details
+  getAppVersion: () => ipcRenderer.invoke('app:get-version'),
   getPythonInfo: () => ipcRenderer.invoke('python:get-info'),
 
   // Auto-Updater
