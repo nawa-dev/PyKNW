@@ -1,6 +1,6 @@
 {
   "name": "pyknw-studio",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Python Code Editor with Built-in Python Runtime and .pyknw Support",
   "main": "src/main/index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "electron",
     "pyknw"
   ],
-  "author": "PyKNW Team",
+  "author": "Nawa Phansaen",
   "license": "MIT",
   "repository": {
     "type": "git",
