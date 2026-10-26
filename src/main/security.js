@@ -1,5 +1,7 @@
 // PyKNW Studio - File Integrity & Container Security Manager
 const crypto = require('crypto');
+const pkg = require('../../package.json');
+const APP_PRODUCT_NAME = pkg.productName || (pkg.build && pkg.build.productName) || 'KNW-Py';
 
 // Secret salt for HMAC digital signature
 const SECRET_KEY = 'PyKNW-STUDIO-INTEGRITY-KEY-2026-NAWAPHAN-DEV-SECURE';
@@ -30,7 +32,7 @@ function packContainer(code) {
   return {
     format: 'pyknw-container',
     version: '1.0',
-    app: 'PyKNW Studio',
+    app: APP_PRODUCT_NAME,
     timestamp: new Date().toISOString(),
     signature,
     payload
@@ -81,7 +83,7 @@ function unpackContainer(rawText, filePath = '') {
     code: rawText,
     isTampered: true,
     isContainer: false,
-    reason: 'โครงสร้างไฟล์ไม่ถูกต้อง (ไฟล์นี้ถูกสร้างหรือเขียนทับจากโปรแกรมภายนอก ไม่ได้บันทึกจาก PyKNW Studio)'
+    reason: `โครงสร้างไฟล์ไม่ถูกต้อง (ไฟล์นี้ถูกสร้างหรือเขียนทับจากโปรแกรมภายนอก ไม่ได้บันทึกจาก ${APP_PRODUCT_NAME})`
   };
 }
 

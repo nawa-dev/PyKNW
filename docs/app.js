@@ -1,18 +1,54 @@
-// PyKNW Studio - GitHub Pages Direct Download Controller
+// KNW-Py / PyKNW Studio - GitHub Pages Controller
 const REPO_OWNER = 'nawa-dev';
 const REPO_NAME = 'PyKNW';
-const FALLBACK_VERSION = 'v1.1.1';
-const FALLBACK_EXE_NAME = 'PyKNW-Studio-Setup.exe';
+const FALLBACK_VERSION = 'v1.2.0';
+const DEFAULT_PRODUCT_NAME = 'KNW-Py';
 
 let directDownloadUrl = null;
-let currentFileName = FALLBACK_EXE_NAME;
+let currentFileName = `${DEFAULT_PRODUCT_NAME}-Setup.exe`;
+let currentProductName = DEFAULT_PRODUCT_NAME;
 let toastTimeout = null;
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+  syncProductNameFromRepo();
   fetchLatestReleaseInfo();
   setupDownloadButton();
 });
+
+// Sync productName dynamically from package.json in the repository
+async function syncProductNameFromRepo() {
+  try {
+    const response = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/package.json`);
+    if (response.ok) {
+      const pkg = await response.json();
+      const productName = pkg.productName || (pkg.build && pkg.build.productName);
+      if (productName && productName !== currentProductName) {
+        currentProductName = productName;
+        applyProductName(productName);
+      }
+    }
+  } catch (err) {
+    console.warn('Could not sync productName from package.json, using default:', err);
+  }
+}
+
+// Apply updated product name across all elements in the landing page
+function applyProductName(name) {
+  // Update title
+  document.title = `${name} - โปรแกรมเขียนโค้ดภาษา Python สำหรับการเรียนรู้`;
+
+  // Update elements with class 'app-name'
+  document.querySelectorAll('.app-name').forEach(el => {
+    el.textContent = name;
+  });
+
+  // Update Download button title
+  const btnTitle = document.getElementById('btnDownloadTitle');
+  if (btnTitle) {
+    btnTitle.textContent = `ดาวน์โหลด ${name} สำหรับ Windows`;
+  }
+}
 
 // Fetch latest release asset (.exe) from GitHub Releases API
 async function fetchLatestReleaseInfo() {
@@ -54,7 +90,6 @@ async function fetchLatestReleaseInfo() {
   }
 
   // Fallback direct URL pattern:
-  // GitHub supports direct release downloads: https://github.com/{owner}/{repo}/releases/latest/download/{asset_name}
   directDownloadUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/latest`;
   if (badgeEl) badgeEl.textContent = FALLBACK_VERSION;
   if (metaEl) {

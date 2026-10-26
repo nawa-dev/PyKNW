@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PyKNW Studio - โปรแกรมเขียนโค้ดภาษา Python สำหรับการเรียนรู้</title>
+  <title id="webPageTitle">KNW-Py - โปรแกรมเขียนโค้ดภาษา Python สำหรับการเรียนรู้</title>
+  
   <!-- Favicon and App Icons -->
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="images/PyKNW.png">
@@ -12,7 +13,7 @@
   <link rel="apple-touch-icon" href="images/PyKNW.png">
 
   <!-- Open Graph Meta for Social Sharing -->
-  <meta property="og:title" content="PyKNW Studio - โปรแกรมเขียนโค้ดภาษา Python สำหรับการเรียนรู้">
+  <meta property="og:title" content="KNW-Py - โปรแกรมเขียนโค้ดภาษา Python สำหรับการเรียนรู้">
   <meta property="og:description" content="เขียนโค้ด Python ได้ทันทีโดยไม่ต้องติดตั้ง Python ลงเครื่อง พร้อม GUI Tkinter ในตัว และระบบตรวจจับข้อผิดพลาดภาษาไทย">
   <meta property="og:image" content="images/PyKNW.png">
   <meta property="og:type" content="website">
@@ -25,12 +26,14 @@
   <nav class="navbar">
     <div class="container nav-content">
       <a href="#" class="nav-brand">
-        <img src="images/PyKNW.png" alt="PyKNW Logo" class="nav-logo">
-        <span class="nav-title">PyKNW Studio</span>
-        <span class="nav-badge" id="versionBadge">v1.1.1</span>
+        <img src="images/PyKNW.png" alt="KNW-Py Logo" class="nav-logo">
+        <span class="nav-title app-name" id="navTitle">KNW-Py</span>
+        <span class="nav-badge" id="versionBadge">v1.2.0</span>
       </a>
 
       <div class="nav-links">
+        <a href="#screenshot" class="nav-link">ภาพหน้าต่างโปรแกรม</a>
+        <a href="#thai-error" class="nav-link">ระบบตรวจจับภาษาไทย</a>
         <a href="#features" class="nav-link">คุณสมบัติ</a>
         <a href="#requirements" class="nav-link">ความต้องการระบบ</a>
         <a href="https://github.com/nawa-dev/PyKNW" target="_blank" rel="noopener" class="nav-btn-gh">
@@ -49,7 +52,7 @@
     <div class="container hero-content">
       <div class="hero-pill">
         <span class="pill-dot"></span>
-        <span>Python Studio ครบวงจรเพื่อการศึกษาและผู้เริ่มต้น</span>
+        <span>Python Code Editor เพื่อการศึกษาและผู้เริ่มต้น</span>
       </div>
 
       <h1 class="hero-title">
@@ -58,7 +61,7 @@
       </h1>
 
       <p class="hero-subtitle">
-        โปรแกรม Code Editor น้ำหนักเบา ออกแบบมาเพื่อการเรียนการสอนภาษา Python โดยเฉพาะ พร้อมฟังก์ชันรับค่าอินพุต input(), รองรับกราฟิก GUI ด้วย Tkinter ในตัว, ระบบไฮไลต์การทำงานทีละบรรทัด และระบบอธิบายข้อผิดพลาดภาษาไทย
+        <strong class="app-name">KNW-Py</strong> โปรแกรม Code Editor น้ำหนักเบา ออกแบบมาเพื่อการเรียนการสอนภาษา Python โดยเฉพาะ พร้อมฟังก์ชันรับค่าอินพุต input(), รองรับกราฟิก GUI ด้วย Tkinter ในตัว, ระบบไฮไลต์การทำงานทีละบรรทัด และระบบอธิบายข้อผิดพลาดภาษาไทย
       </p>
 
       <div class="hero-actions">
@@ -72,7 +75,7 @@
               </svg>
             </div>
             <div class="btn-text-group">
-              <span class="btn-main-text">ดาวน์โหลดสำหรับ Windows</span>
+              <span class="btn-main-text" id="btnDownloadTitle">ดาวน์โหลด KNW-Py สำหรับ Windows</span>
               <span class="btn-sub-text" id="downloadMeta">กำลังดึงข้อมูลเวอร์ชันล่าสุด...</span>
             </div>
           </a>
@@ -80,56 +83,63 @@
         </div>
       </div>
 
-      <!-- App Interface Preview Mockup -->
-      <div class="preview-container">
+      <!-- Real Application Window Screenshot Mockup -->
+      <div class="preview-container" id="screenshot">
         <div class="mockup-header">
           <div class="mockup-controls">
             <div class="mockup-dot red"></div>
             <div class="mockup-dot yellow"></div>
             <div class="mockup-dot green"></div>
           </div>
-          <div class="mockup-tabs">
-            <div class="mockup-tab">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-              </svg>
-              <span>main.pyknw</span>
-            </div>
+          <div class="mockup-title">
+            <span class="app-name">KNW-Py</span> — หน้าต่างการทำงานจริง
           </div>
-          <div class="mockup-actions">
-            <div class="mockup-btn">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-              <span>รัน</span>
-            </div>
-          </div>
+          <div class="mockup-status">พร้อมใช้งาน</div>
         </div>
-
-        <div class="mockup-body">
-          <div class="mockup-editor">
-            <div><span class="token-comment"># PyKNW Studio - เริ่มต้นเขียน Python ได้ทันที</span></div>
-            <div><span class="token-keyword">def</span> <span class="token-function">calculate_score</span>(name, score):</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="token-keyword">if</span> score &gt;= <span class="token-number">50</span>:</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="token-keyword">return</span> <span class="token-string">f"ยินดีด้วยคุณ {name} สอบผ่าน!"</span></div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="token-keyword">return</span> <span class="token-string">f"พยายามอีกนิดคุณ {name} สอบไม่ผ่าน"</span></div>
-            <br>
-            <div>name = <span class="token-function">input</span>(<span class="token-string">"กรุณากรอกชื่อ: "</span>)</div>
-            <div>result = <span class="token-function">calculate_score</span>(name, <span class="token-number">85</span>)</div>
-            <div><span class="token-function">print</span>(result)</div>
-          </div>
-
-          <div class="mockup-console">
-            <div class="console-title">คอนโซลแสดงผล (Output Terminal)</div>
-            <div>กรุณากรอกชื่อ: สมชาย</div>
-            <div class="console-output-text">ยินดีด้วยคุณ สมชาย สอบผ่าน!</div>
-            <div>[จบการทำงาน - รหัสสถานะ 0]</div>
-          </div>
+        <div class="mockup-image-wrapper">
+          <img src="images/screenshot1.png" alt="KNW-Py Workspace Real Screenshot" class="app-screenshot-img">
         </div>
       </div>
     </div>
   </header>
+
+  <!-- Showcase Highlight Section: Thai Error Diagnostics -->
+  <section class="showcase-section" id="thai-error">
+    <div class="container">
+      <div class="showcase-card">
+        <div class="showcase-text">
+          <div class="section-tag">จุดเด่นพิเศษที่ Editor อื่นไม่มี</div>
+          <h2 class="showcase-title">ระบบรายงานข้อผิดพลาดภาษาไทย (Thai Error Diagnostics)</h2>
+          <p class="showcase-desc">
+            ในโปรแกรมเขียนโค้ดทั่วไป เมื่อโค้ดมีข้อผิดพลาด ผู้เรียนมักจะพบกับ Traceback ภาษาอังกฤษที่ยาวและซับซ้อน ทำให้เกิดความกลัวและถอดใจได้ง่าย
+          </p>
+          <p class="showcase-desc">
+            <strong class="app-name">KNW-Py</strong> ออกแบบระบบตรวจจับและแปลข้อผิดพลาดเป็นภาษาไทยที่เข้าใจง่าย ระบุตำแหน่งบรรทัดชัดเจน พร้อมคำอธิบายสาเหตุและวิธีแก้ไข เพื่อช่วยให้นักเรียนสามารถวิเคราะห์และแก้ไขปัญหาโค้ดได้ด้วยตนเอง
+          </p>
+          <ul class="showcase-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>ระบุประเภทข้อผิดพลาดและตำแหน่งบรรทัดอย่างแม่นยำ</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>คำอธิบายภาษาไทยสั้นกระชับ ชี้จุดบกพร่องตรงประเด็น</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>ไฮไลต์บรรทัดที่เกิดข้อผิดพลาดในตัว Editor ทันที</span>
+            </li>
+          </ul>
+        </div>
+        <div class="showcase-media">
+          <div class="showcase-img-frame">
+            <img src="images/thailang_error.png" alt="Thai Error Diagnostics Real Screenshot" class="showcase-img">
+          </div>
+          <span class="showcase-caption">ภาพจริงจากการทำงาน: แสดงข้อความเตือนและคำอธิบายภาษาไทยเมื่อเกิดข้อผิดพลาด</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Features Section -->
   <section class="features-section" id="features">
@@ -219,7 +229,7 @@
         <div class="feature-card">
           <div class="feature-icon-wrapper">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="5"></circle>
+              <circle cx="12" cy="5" r="5"></circle>
               <line x1="12" y1="1" x2="12" y2="3"></line>
               <line x1="12" y1="21" x2="12" y2="23"></line>
               <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
@@ -295,8 +305,8 @@
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
-      <p>PyKNW Studio • พัฒนาโดย <a href="https://github.com/nawa-dev" target="_blank" rel="noopener">Nawa Phansaen</a></p>
-      <p style="margin-top: 6px; font-size: 12px; color: #71717a;">ซอฟต์แวร์โอเพนซอร์สภายใต้สัญญาอนุญาต MIT License</p>
+      <p><span class="app-name">KNW-Py</span> • พัฒนาโดย <a href="https://github.com/nawa-dev" target="_blank" rel="noopener">Nawa Phansaen</a></p>
+      <p style="margin-top: 6px; font-size: 12px; color: #64748b;">ซอฟต์แวร์โอเพนซอร์สภายใต้สัญญาอนุญาต MIT License</p>
     </div>
   </footer>
 

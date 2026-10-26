@@ -47,6 +47,8 @@ contextBridge.exposeInMainWorld('pyknwAPI', {
   },
 
   // App details
+  getAppName: () => ipcRenderer.invoke('app:get-product-name'),
+  getAppInfo: () => ipcRenderer.invoke('app:get-info'),
   getAppVersion: () => ipcRenderer.invoke('app:get-version'),
   getPythonInfo: () => ipcRenderer.invoke('python:get-info'),
 

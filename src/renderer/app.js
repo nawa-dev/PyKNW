@@ -15,6 +15,27 @@ let currentConsoleFontSize = DEFAULT_CONSOLE_FONT_SIZE;
 // Security: In-Memory Internal Clipboard State
 let internalClipboard = null;
 
+// Product Name Synchronization (Single Source of Truth from package.json)
+let APP_PRODUCT_NAME = 'KNW-Py';
+
+async function syncAppInfo() {
+  try {
+    if (window.pyknwAPI && window.pyknwAPI.getAppInfo) {
+      const info = await window.pyknwAPI.getAppInfo();
+      if (info && info.name) {
+        APP_PRODUCT_NAME = info.name;
+        const brandNameEl = document.getElementById('brandName');
+        if (brandNameEl) brandNameEl.textContent = APP_PRODUCT_NAME;
+        updateTitleBar();
+      }
+    }
+  } catch (err) {
+    console.warn('Could not sync app info:', err);
+  }
+}
+
+syncAppInfo();
+
 // UI Elements
 const workspaceContainer = document.getElementById('workspaceContainer');
 const tabsContainer = document.getElementById('tabsContainer');
@@ -156,12 +177,12 @@ require(['vs/editor/editor.main'], function () {
   });
 
   // Create initial demo tab
-  const sampleCode = `# PyKNW Studio - โปรแกรมเขียนโค้ดภาษา Python (.pyknw)
+  const sampleCode = `# ${APP_PRODUCT_NAME} - โปรแกรมเขียนโค้ดภาษา Python (.pyknw)
 # ทำงานได้ทันทีโดยไม่ต้องติดตั้ง Python ลงในเครื่อง
 # ----------------------------------------------------
 
 def main():
-    print("ยินดีต้อนรับสู่ PyKNW Studio")
+    print("ยินดีต้อนรับสู่ ${APP_PRODUCT_NAME}")
     for i in range(1, 4):
         print(f"ขั้นตอนที่ {i}: สำเร็จ")
 
@@ -497,7 +518,9 @@ function getCurrentTab() {
 function updateTitleBar() {
   const current = getCurrentTab();
   if (current) {
-    document.title = `${current.title} - PyKNW Studio`;
+    document.title = `${current.title} - ${APP_PRODUCT_NAME}`;
+  } else {
+    document.title = APP_PRODUCT_NAME;
   }
 }
 

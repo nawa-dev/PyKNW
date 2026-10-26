@@ -5,6 +5,8 @@ const { spawn } = require('child_process');
 const os = require('os');
 const { setupAutoUpdater } = require('./updater');
 const { packContainer, unpackContainer } = require('./security');
+const pkg = require('../../package.json');
+const APP_PRODUCT_NAME = pkg.productName || (pkg.build && pkg.build.productName) || pkg.name || 'KNW-Py';
 
 let mainWindow = null;
 let currentChildProcess = null;
@@ -52,6 +54,7 @@ function createWindow() {
   const iconPath = path.join(__dirname, '../image/PyKNW.ico');
 
   mainWindow = new BrowserWindow({
+    title: APP_PRODUCT_NAME,
     width: 1280,
     height: 850,
     minWidth: 960,
@@ -97,7 +100,7 @@ function createWindow() {
         buttons: ['ปิดโปรแกรม (ไม่บันทึก)', 'ยกเลิก'],
         defaultId: 1,
         cancelId: 1,
-        title: 'ยืนยันการปิดโปรแกรม',
+        title: `${APP_PRODUCT_NAME} - ยืนยันการปิดโปรแกรม`,
         message: 'มีไฟล์ที่ยังไม่ได้บันทึก ต้องการปิดโปรแกรมหรือไม่?',
         detail: detailMsg
       });
@@ -220,6 +223,18 @@ ipcMain.handle('window:close', () => {
 
 ipcMain.handle('window:is-maximized', () => {
   return mainWindow ? mainWindow.isMaximized() : false;
+});
+
+// IPC Handler: App Name & Info
+ipcMain.handle('app:get-name', () => {
+  return APP_PRODUCT_NAME;
+});
+
+ipcMain.handle('app:get-info', () => {
+  return {
+    name: APP_PRODUCT_NAME,
+    version: app.getVersion()
+  };
 });
 
 // IPC Handler: App Version
