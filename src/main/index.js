@@ -4,6 +4,7 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const os = require('os');
 const { setupAutoUpdater } = require('./updater');
+const { packContainer, unpackContainer } = require('./security');
 
 let mainWindow = null;
 let currentChildProcess = null;
@@ -82,10 +83,13 @@ function createWindow() {
   mainWindow.webContents.once('did-finish-load', () => {
     if (fileToOpenOnStartup && fs.existsSync(fileToOpenOnStartup)) {
       try {
-        const content = fs.readFileSync(fileToOpenOnStartup, 'utf-8');
+        const rawContent = fs.readFileSync(fileToOpenOnStartup, 'utf-8');
+        const parsed = unpackContainer(rawContent, fileToOpenOnStartup);
         mainWindow.webContents.send('app:open-file', {
           filePath: fileToOpenOnStartup,
-          content
+          content: parsed.code,
+          isTampered: parsed.isTampered,
+          tamperedReason: parsed.reason || null
         });
         fileToOpenOnStartup = null;
       } catch (err) {
@@ -121,8 +125,14 @@ if (!gotTheLock) {
       // Check for file in args
       const filePath = commandLine.find(arg => arg.endsWith('.pyknw') || arg.endsWith('.py'));
       if (filePath && fs.existsSync(filePath)) {
-        const content = fs.readFileSync(filePath, 'utf-8');
-        mainWindow.webContents.send('app:open-file', { filePath, content });
+        const rawContent = fs.readFileSync(filePath, 'utf-8');
+        const parsed = unpackContainer(rawContent, filePath);
+        mainWindow.webContents.send('app:open-file', {
+          filePath,
+          content: parsed.code,
+          isTampered: parsed.isTampered,
+          tamperedReason: parsed.reason || null
+        });
       }
     }
   });
@@ -204,24 +214,16 @@ ipcMain.handle('python:run', async (event, { code, filePath, stepDelay = 0.3 }) 
     } catch (e) {}
   }
 
-  // Create temporary file or use existing file
-  let scriptPath = filePath;
-  let isTemp = false;
-
-  if (!scriptPath) {
-    const tempDir = path.join(os.tmpdir(), 'pyknw_runner');
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
-    scriptPath = path.join(tempDir, `script_${Date.now()}.pyknw`);
-    fs.writeFileSync(scriptPath, code, 'utf-8');
-    isTemp = true;
-  } else {
-    // Save current code to the file before running
-    fs.writeFileSync(scriptPath, code, 'utf-8');
+  // Always write pure Python code to a temporary execution script
+  const tempDir = path.join(os.tmpdir(), 'pyknw_runner');
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
   }
+  const scriptPath = path.join(tempDir, `exec_${Date.now()}.py`);
+  fs.writeFileSync(scriptPath, code, 'utf-8');
+  const isTemp = true;
 
-  const scriptDir = path.dirname(scriptPath);
+  const scriptDir = (filePath && fs.existsSync(filePath)) ? path.dirname(filePath) : tempDir;
 
   return new Promise((resolve) => {
     const startTime = Date.now();
@@ -397,10 +399,16 @@ ipcMain.handle('dialog:open-file', async () => {
     return null;
   }
 
-  return result.filePaths.map(filePath => ({
-    filePath,
-    content: fs.readFileSync(filePath, 'utf-8')
-  }));
+  return result.filePaths.map(filePath => {
+    const rawContent = fs.readFileSync(filePath, 'utf-8');
+    const parsed = unpackContainer(rawContent, filePath);
+    return {
+      filePath,
+      content: parsed.code,
+      isTampered: parsed.isTampered,
+      tamperedReason: parsed.reason || null
+    };
+  });
 });
 
 ipcMain.handle('dialog:save-file', async (event, defaultName = 'main.pyknw') => {
@@ -421,6 +429,15 @@ ipcMain.handle('dialog:save-file', async (event, defaultName = 'main.pyknw') => 
 });
 
 ipcMain.handle('fs:save-file', async (event, { filePath, content }) => {
-  fs.writeFileSync(filePath, content, 'utf-8');
-  return true;
+  try {
+    if (filePath && filePath.toLowerCase().endsWith('.pyknw')) {
+      const container = packContainer(content);
+      fs.writeFileSync(filePath, JSON.stringify(container, null, 2), 'utf-8');
+    } else {
+      fs.writeFileSync(filePath, content, 'utf-8');
+    }
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
 });

@@ -1,60 +1,8 @@
-# ==========================================
-# ตัวอย่างการสร้างหน้าต่าง GUI ด้วย tkinter
-# ฝังมาในโปรแกรมแล้ว รันได้ทันทีไม่ต้องติดตั้งเพิ่ม!
-# ==========================================
-
-import tkinter as tk
-from tkinter import messagebox
-
-def on_click():
-    name = entry.get().strip()
-    if name:
-        messagebox.showinfo("ทักทาย", f"สวัสดีคุณ {name}!\nยินดีต้อนรับสู่ PyKNW Studio")
-    else:
-        messagebox.showwarning("แจ้งเตือน", "กรุณากรอกชื่อของคุณก่อนกดปุ่ม")
-
-# สร้างหน้าต่างหลัก
-root = tk.Tk()
-root.title("PyKNW Studio - ตัวอย่าง Tkinter GUI")
-root.geometry("380x220")
-root.configure(bg="#18181b")
-
-# ข้อความหัวข้อ
-title_label = tk.Label(
-    root, 
-    text="🐍 ตัวอย่างโปรแกรม GUI ด้วย Tkinter", 
-    font=("Segoe UI", 12, "bold"),
-    fg="#38bdf8", 
-    bg="#18181b"
-)
-title_label.pack(pady=15)
-
-# ช่องป้อนข้อความ
-entry = tk.Entry(
-    root, 
-    font=("Segoe UI", 11), 
-    width=25,
-    justify="center"
-)
-entry.insert(0, "ผู้ใช้งาน")
-entry.pack(pady=10)
-
-# ปุ่มกดยืนยัน
-btn = tk.Button(
-    root, 
-    text="กดเพื่อทักทาย", 
-    font=("Segoe UI", 10, "bold"),
-    bg="#16a34a", 
-    fg="white", 
-    padx=15, 
-    pady=5,
-    command=on_click,
-    relief="flat",
-    cursor="hand2"
-)
-btn.pack(pady=15)
-
-# เริ่มการทำงานของหน้าต่าง GUI
-print("กำลังเปิดหน้าต่าง Tkinter GUI...")
-root.mainloop()
-print("ปิดหน้าต่าง Tkinter เรียบร้อยแล้ว")
+{
+  "format": "pyknw-container",
+  "version": "1.0",
+  "app": "PyKNW Studio",
+  "timestamp": "2026-10-26T16:00:00.633Z",
+  "signature": "c83a3fe72d5b2d7d10d79e84ecd2f3a602ada69cfdd1a01b494ae93b3edd7c43",
+  "payload": "IyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KIyDguJXguLHguKfguK3guKLguYjguLLguIfguIHguLLguKPguKrguKPguYnguLLguIfguKvguJnguYnguLLguJXguYjguLLguIcgR1VJIOC4lOC5ieC4p+C4oiB0a2ludGVyCiMg4Lid4Lix4LiH4Lih4Liy4LmD4LiZ4LmC4Lib4Lij4LmB4LiB4Lij4Lih4LmB4Lil4LmJ4LinIOC4o+C4seC4meC5hOC4lOC5ieC4l+C4seC4meC4l+C4teC5hOC4oeC5iOC4leC5ieC4reC4h+C4leC4tOC4lOC4leC4seC5ieC4h+C5gOC4nuC4tOC5iOC4oSEKIyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCmltcG9ydCB0a2ludGVyIGFzIHRrCmZyb20gdGtpbnRlciBpbXBvcnQgbWVzc2FnZWJveAoKZGVmIG9uX2NsaWNrKCk6CiAgICBuYW1lID0gZW50cnkuZ2V0KCkuc3RyaXAoKQogICAgaWYgbmFtZToKICAgICAgICBtZXNzYWdlYm94LnNob3dpbmZvKCLguJfguLHguIHguJfguLLguKIiLCBmIuC4quC4p+C4seC4quC4lOC4teC4hOC4uOC4kyB7bmFtZX0hXG7guKLguLTguJnguJTguLXguJXguYnguK3guJnguKPguLHguJrguKrguLnguYggUHlLTlcgU3R1ZGlvIikKICAgIGVsc2U6CiAgICAgICAgbWVzc2FnZWJveC5zaG93d2FybmluZygi4LmB4LiI4LmJ4LiH4LmA4LiV4Li34Lit4LiZIiwgIuC4geC4o+C4uOC4k+C4suC4geC4o+C4reC4geC4iuC4t+C5iOC4reC4guC4reC4h+C4hOC4uOC4k+C4geC5iOC4reC4meC4geC4lOC4m+C4uOC5iOC4oSIpCgojIOC4quC4o+C5ieC4suC4h+C4q+C4meC5ieC4suC4leC5iOC4suC4h+C4q+C4peC4seC4gQpyb290ID0gdGsuVGsoKQpyb290LnRpdGxlKCJQeUtOVyBTdHVkaW8gLSDguJXguLHguKfguK3guKLguYjguLLguIcgVGtpbnRlciBHVUkiKQpyb290Lmdlb21ldHJ5KCIzODB4MjIwIikKcm9vdC5jb25maWd1cmUoYmc9IiMxODE4MWIiKQoKIyDguILguYnguK3guITguKfguLLguKHguKvguLHguKfguILguYnguK0KdGl0bGVfbGFiZWwgPSB0ay5MYWJlbCgKICAgIHJvb3QsIAogICAgdGV4dD0i8J+QjSDguJXguLHguKfguK3guKLguYjguLLguIfguYLguJvguKPguYHguIHguKPguKEgR1VJIOC4lOC5ieC4p+C4oiBUa2ludGVyIiwgCiAgICBmb250PSgiU2Vnb2UgVUkiLCAxMiwgImJvbGQiKSwKICAgIGZnPSIjMzhiZGY4IiwgCiAgICBiZz0iIzE4MTgxYiIKKQp0aXRsZV9sYWJlbC5wYWNrKHBhZHk9MTUpCgojIOC4iuC5iOC4reC4h+C4m+C5ieC4reC4meC4guC5ieC4reC4hOC4p+C4suC4oQplbnRyeSA9IHRrLkVudHJ5KAogICAgcm9vdCwgCiAgICBmb250PSgiU2Vnb2UgVUkiLCAxMSksIAogICAgd2lkdGg9MjUsCiAgICBqdXN0aWZ5PSJjZW50ZXIiCikKZW50cnkuaW5zZXJ0KDAsICLguJzguLnguYnguYPguIrguYnguIfguLLguJkiKQplbnRyeS5wYWNrKHBhZHk9MTApCgojIOC4m+C4uOC5iOC4oeC4geC4lOC4ouC4t+C4meC4ouC4seC4mQpidG4gPSB0ay5CdXR0b24oCiAgICByb290LCAKICAgIHRleHQ9IuC4geC4lOC5gOC4nuC4t+C5iOC4reC4l+C4seC4geC4l+C4suC4oiIsIAogICAgZm9udD0oIlNlZ29lIFVJIiwgMTAsICJib2xkIiksCiAgICBiZz0iIzE2YTM0YSIsIAogICAgZmc9IndoaXRlIiwgCiAgICBwYWR4PTE1LCAKICAgIHBhZHk9NSwKICAgIGNvbW1hbmQ9b25fY2xpY2ssCiAgICByZWxpZWY9ImZsYXQiLAogICAgY3Vyc29yPSJoYW5kMiIKKQpidG4ucGFjayhwYWR5PTE1KQoKIyDguYDguKPguLTguYjguKHguIHguLLguKPguJfguLPguIfguLLguJnguILguK3guIfguKvguJnguYnguLLguJXguYjguLLguIcgR1VJCnByaW50KCLguIHguLPguKXguLHguIfguYDguJvguLTguJTguKvguJnguYnguLLguJXguYjguLLguIcgVGtpbnRlciBHVUkuLi4iKQpyb290Lm1haW5sb29wKCkKcHJpbnQoIuC4m+C4tOC4lOC4q+C4meC5ieC4suC4leC5iOC4suC4hyBUa2ludGVyIOC5gOC4o+C4teC4ouC4muC4o+C5ieC4reC4ouC5geC4peC5ieC4pyIpCg=="
+}

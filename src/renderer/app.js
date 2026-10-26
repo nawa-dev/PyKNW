@@ -43,6 +43,8 @@ const editorCursorEl = document.getElementById('editorCursor');
 const editorZoomEl = document.getElementById('editorZoom');
 const tabCountStatusEl = document.getElementById('tabCountStatus');
 const appVersionStatus = document.getElementById('appVersionStatus');
+const tamperBanner = document.getElementById('tamperBanner');
+const tamperReasonText = document.getElementById('tamperReasonText');
 const panelResizer = document.getElementById('panelResizer');
 
 // Window Control Elements
@@ -107,7 +109,7 @@ if __name__ == "__main__":
 // ==========================================
 // Multi-Tab Management
 // ==========================================
-function createTab(title, content = '', filePath = null) {
+function createTab(title, content = '', filePath = null, isTampered = false, tamperedReason = null) {
   const tabId = `tab_${Date.now()}_${tabCounter++}`;
   const uri = monaco.Uri.parse(`inmemory://pyknw/${tabId}/${title}`);
   const model = monaco.editor.createModel(content, 'python', uri);
@@ -118,7 +120,9 @@ function createTab(title, content = '', filePath = null) {
     filePath: filePath,
     model: model,
     viewState: null,
-    isDirty: false
+    isDirty: false,
+    isTampered: !!isTampered,
+    tamperedReason: tamperedReason || null
   };
 
   model.onDidChangeContent(() => {
@@ -153,6 +157,31 @@ function switchTab(tabId) {
 
   renderTabs();
   updateTitleBar();
+  updateTamperStatus();
+}
+
+function updateTamperStatus() {
+  const currentTab = getCurrentTab();
+  if (!tamperBanner) return;
+
+  if (currentTab && currentTab.isTampered) {
+    tamperBanner.style.display = 'flex';
+    if (tamperReasonText) {
+      tamperReasonText.textContent = currentTab.tamperedReason || 'ไฟล์นี้ไม่ผ่านการตรวจสอบลายเซ็นความปลอดภัย ปุ่ม [ รัน ] ถูกระงับการใช้งาน';
+    }
+    if (btnRunStop) {
+      btnRunStop.classList.add('blocked');
+      btnRunStop.title = 'ปุ่มรันถูกระงับ: ตรวจพบการแก้ไขหรือวางโค้ดจาก Notepad';
+    }
+  } else {
+    tamperBanner.style.display = 'none';
+    if (btnRunStop && !isRunning) {
+      btnRunStop.classList.remove('blocked');
+      btnRunStop.title = 'รันไฟล์ปัจจุบัน (F5 หรือ Ctrl+Enter)';
+    }
+  }
+
+  if (editor) editor.layout();
 }
 
 function closeTab(tabId, e) {
@@ -189,16 +218,22 @@ function renderTabs() {
 
   tabs.forEach(tab => {
     const tabEl = document.createElement('div');
-    tabEl.className = `code-tab ${tab.id === activeTabId ? 'active' : ''} ${tab.isDirty ? 'dirty' : ''}`;
+    const tamperedClass = tab.isTampered ? 'tampered' : '';
+    tabEl.className = `code-tab ${tab.id === activeTabId ? 'active' : ''} ${tab.isDirty ? 'dirty' : ''} ${tamperedClass}`;
     tabEl.onclick = () => switchTab(tab.id);
 
     const iconSpan = document.createElement('span');
     iconSpan.className = 'tab-file-icon';
-    iconSpan.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`;
+    if (tab.isTampered) {
+      iconSpan.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      tabEl.title = `ตรวจพบการแก้ไขจากโปรแกรมภายนอก: ${tab.tamperedReason || 'Notepad'}`;
+    } else {
+      iconSpan.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`;
+    }
 
     const titleSpan = document.createElement('span');
     titleSpan.className = 'tab-title';
-    titleSpan.textContent = tab.title;
+    titleSpan.textContent = tab.isTampered ? `⚠️ ${tab.title}` : tab.title;
 
     const dotSpan = document.createElement('span');
     dotSpan.className = 'tab-status-dot';
@@ -519,6 +554,13 @@ async function runCode() {
   const currentTab = getCurrentTab();
   if (!currentTab) return;
 
+  // ตรวจจับการทุจริต: ไม่อนุญาตให้รันโค้ดที่แอบแก้ไขหรือนำเข้าจากภายนอก (Notepad)
+  if (currentTab.isTampered) {
+    showToast('ไม่อนุญาตให้รันโค้ด: ตรวจพบว่าไฟล์นี้ถูกสร้างหรือแก้ไขจากภายนอก (Notepad)', 'warning', 4500);
+    updateTamperStatus();
+    return;
+  }
+
   // บังคับบันทึกไฟล์ก่อนสั่งรันเสมอ (ถ้าเคยเซฟแล้วจะเซฟทับทันที ถ้ายังไม่เคยเซฟจะถามปลายทาง)
   const saved = await saveCurrentFile(false);
   if (!saved) {
@@ -597,7 +639,7 @@ window.pyknwAPI.onExit(({ code, elapsed }) => onExecutionFinished(code, elapsed)
 // App opened with a file from OS
 window.pyknwAPI.onFileOpenedByOS((data) => {
   if (data && data.filePath) {
-    createTab(getFileName(data.filePath), data.content, data.filePath);
+    createTab(getFileName(data.filePath), data.content, data.filePath, data.isTampered, data.tamperedReason);
   }
 });
 
@@ -615,9 +657,11 @@ async function openFiles() {
     fileList.forEach(item => {
       const existing = tabs.find(t => t.filePath === item.filePath);
       if (existing) {
+        existing.isTampered = !!item.isTampered;
+        existing.tamperedReason = item.tamperedReason || null;
         switchTab(existing.id);
       } else {
-        createTab(getFileName(item.filePath), item.content, item.filePath);
+        createTab(getFileName(item.filePath), item.content, item.filePath, item.isTampered, item.tamperedReason);
       }
     });
   }
@@ -626,6 +670,12 @@ async function openFiles() {
 async function saveCurrentFile(forceSaveAs = false) {
   const currentTab = getCurrentTab();
   if (!currentTab) return false;
+
+  // ป้องกันการบันทึกทับเพื่อฟอกขาวโค้ดที่แอบแก้ไขจาก Notepad
+  if (currentTab.isTampered) {
+    showToast('ไม่อนุญาตให้บันทึกไฟล์นี้: ตรวจพบว่าไฟล์ถูกดัดแปลงจาก Notepad กรุณาสร้างแท็บไฟล์ใหม่เพื่อเขียนโค้ดด้วยตนเอง', 'warning', 5000);
+    return false;
+  }
 
   const content = currentTab.model.getValue();
 
@@ -641,7 +691,8 @@ async function saveCurrentFile(forceSaveAs = false) {
   currentTab.isDirty = false;
   renderTabs();
   updateTitleBar();
-  showToast(`บันทึกไฟล์ ${currentTab.title} เรียบร้อย`, 'success');
+  updateTamperStatus();
+  showToast(`บันทึกไฟล์ ${currentTab.title} เรียบร้อย (สร้างลายเซ็นความปลอดภัยแล้ว)`, 'success');
   return true;
 }
 

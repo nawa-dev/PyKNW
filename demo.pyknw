@@ -1,27 +1,8 @@
-# ==========================================
-# ไฟล์ตัวอย่าง PyKNW Studio (.pyknw)
-# ==========================================
-
-import sys
-import math
-
-def main():
-    print("ยินดีต้อนรับสู่ PyKNW Studio!")
-    print(f"เวอร์ชัน Python: {sys.version.split()[0]}")
-    print("------------------------------------------")
-    
-    # คำนวณทางคณิตศาสตร์
-    radius = 5
-    area = math.pi * (radius ** 2)
-    print(f"พื้นที่วงกลมรัศมี {radius} หน่วย คือ: {area:.2f}")
-    
-    # รายการผลลัพธ์
-    items = ["เครื่องมือแก้ไขโค้ด Monaco", "รัน Python ในตัวไม่ต้องติดตั้ง", "นามสกุลไฟล์เฉพาะ .pyknw", "ระบบป้องกันการคัดลอกจากภายนอก"]
-    print("\nคุณสมบัติเด่นของโปรแกรม:")
-    for idx, item in enumerate(items, 1):
-        print(f"  {idx}. {item}")
-        
-    print("\nการประมวลผลเสร็จสิ้นสมบูรณ์")
-
-if __name__ == "__main__":
-    main()
+{
+  "format": "pyknw-container",
+  "version": "1.0",
+  "app": "PyKNW Studio",
+  "timestamp": "2026-10-26T16:00:00.628Z",
+  "signature": "a68446699491ca428487add1d2651731f2b61934e947696fbd46457b0f7a7683",
+  "payload": "IyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KIyDguYTguJ/guKXguYzguJXguLHguKfguK3guKLguYjguLLguIcgUHlLTlcgU3R1ZGlvICgucHlrbncpCiMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CgppbXBvcnQgc3lzCmltcG9ydCBtYXRoCgpkZWYgbWFpbigpOgogICAgcHJpbnQoIuC4ouC4tOC4meC4lOC4teC4leC5ieC4reC4meC4o+C4seC4muC4quC4ueC5iCBQeUtOVyBTdHVkaW8hIikKICAgIHByaW50KGYi4LmA4Lin4Lit4Lij4LmM4LiK4Lix4LiZIFB5dGhvbjoge3N5cy52ZXJzaW9uLnNwbGl0KClbMF19IikKICAgIHByaW50KCItLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0iKQogICAgCiAgICAjIOC4hOC4s+C4meC4p+C4k+C4l+C4suC4h+C4hOC4k+C4tOC4leC4qOC4suC4quC4leC4o+C5jAogICAgcmFkaXVzID0gNQogICAgYXJlYSA9IG1hdGgucGkgKiAocmFkaXVzICoqIDIpCiAgICBwcmludChmIuC4nuC4t+C5ieC4meC4l+C4teC5iOC4p+C4h+C4geC4peC4oeC4o+C4seC4qOC4oeC4tSB7cmFkaXVzfSDguKvguJnguYjguKfguKIg4LiE4Li34LitOiB7YXJlYTouMmZ9IikKICAgIAogICAgIyDguKPguLLguKLguIHguLLguKPguJzguKXguKXguLHguJ7guJjguYwKICAgIGl0ZW1zID0gWyLguYDguITguKPguLfguYjguK3guIfguKHguLfguK3guYHguIHguYnguYTguILguYLguITguYnguJQgTW9uYWNvIiwgIuC4o+C4seC4mSBQeXRob24g4LmD4LiZ4LiV4Lix4Lin4LmE4Lih4LmI4LiV4LmJ4Lit4LiH4LiV4Li04LiU4LiV4Lix4LmJ4LiHIiwgIuC4meC4suC4oeC4quC4geC4uOC4peC5hOC4n+C4peC5jOC5gOC4ieC4nuC4suC4sCAucHlrbnciLCAi4Lij4Liw4Lia4Lia4Lib4LmJ4Lit4LiH4LiB4Lix4LiZ4LiB4Liy4Lij4LiE4Lix4LiU4Lil4Lit4LiB4LiI4Liy4LiB4Lig4Liy4Lii4LiZ4Lit4LiBIl0KICAgIHByaW50KCJcbuC4hOC4uOC4k+C4quC4oeC4muC4seC4leC4tOC5gOC4lOC5iOC4meC4guC4reC4h+C5guC4m+C4o+C5geC4geC4o+C4oToiKQogICAgZm9yIGlkeCwgaXRlbSBpbiBlbnVtZXJhdGUoaXRlbXMsIDEpOgogICAgICAgIHByaW50KGYiICB7aWR4fS4ge2l0ZW19IikKICAgICAgICAKICAgIHByaW50KCJcbuC4geC4suC4o+C4m+C4o+C4sOC4oeC4p+C4peC4nOC4peC5gOC4quC4o+C5h+C4iOC4quC4tOC5ieC4meC4quC4oeC4muC4ueC4o+C4k+C5jCIpCgppZiBfX25hbWVfXyA9PSAiX19tYWluX18iOgogICAgbWFpbigpCg=="
+}

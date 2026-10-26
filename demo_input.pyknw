@@ -1,19 +1,8 @@
-# -*- coding: utf-8 -*-
-# ตัวอย่างการใช้งานฟังก์ชัน input() ใน PyKNW Studio
-
-print("=== ยินดีต้อนรับสู่ระบบทดสอบอินพุต ===")
-
-name = input("กรุณากรอกชื่อของคุณ: ")
-print(f"สวัสดีคุณ {name}!")
-
-age_str = input("กรุณากรอกอายุของคุณ (ตัวเลข): ")
-try:
-    age = int(age_str)
-    birth_year_be = 2567 - age
-    print(f"คุณ {name} เกิดประมาณ พ.ศ. {birth_year_be}")
-except ValueError:
-    print("คุณไม่ได้กรอกตัวเลขที่ถูกต้อง!")
-
-fav_color = input("สีที่คุณชอบคืออะไร: ")
-print(f"สรุปข้อมูล: {name} ชอบสี {fav_color}")
-print("=== จบการทำงานเรียบร้อย ===")
+{
+  "format": "pyknw-container",
+  "version": "1.0",
+  "app": "PyKNW Studio",
+  "timestamp": "2026-10-26T16:00:00.634Z",
+  "signature": "21c0d8741218362e9cb81c10ab2bcf7c57e749634063f297de5a3403e869550f",
+  "payload": "IyAtKi0gY29kaW5nOiB1dGYtOCAtKi0KIyDguJXguLHguKfguK3guKLguYjguLLguIfguIHguLLguKPguYPguIrguYnguIfguLLguJnguJ/guLHguIfguIHguYzguIrguLHguJkgaW5wdXQoKSDguYPguJkgUHlLTlcgU3R1ZGlvCgpwcmludCgiPT09IOC4ouC4tOC4meC4lOC4teC4leC5ieC4reC4meC4o+C4seC4muC4quC4ueC5iOC4o+C4sOC4muC4muC4l+C4lOC4quC4reC4muC4reC4tOC4meC4nuC4uOC4lSA9PT0iKQoKbmFtZSA9IGlucHV0KCLguIHguKPguLjguJPguLLguIHguKPguK3guIHguIrguLfguYjguK3guILguK3guIfguITguLjguJM6ICIpCnByaW50KGYi4Liq4Lin4Lix4Liq4LiU4Li14LiE4Li44LiTIHtuYW1lfSEiKQoKYWdlX3N0ciA9IGlucHV0KCLguIHguKPguLjguJPguLLguIHguKPguK3guIHguK3guLLguKLguLjguILguK3guIfguITguLjguJMgKOC4leC4seC4p+C5gOC4peC4gik6ICIpCnRyeToKICAgIGFnZSA9IGludChhZ2Vfc3RyKQogICAgYmlydGhfeWVhcl9iZSA9IDI1NjcgLSBhZ2UKICAgIHByaW50KGYi4LiE4Li44LiTIHtuYW1lfSDguYDguIHguLTguJTguJvguKPguLDguKHguLLguJMg4LieLuC4qC4ge2JpcnRoX3llYXJfYmV9IikKZXhjZXB0IFZhbHVlRXJyb3I6CiAgICBwcmludCgi4LiE4Li44LiT4LmE4Lih4LmI4LmE4LiU4LmJ4LiB4Lij4Lit4LiB4LiV4Lix4Lin4LmA4Lil4LiC4LiX4Li14LmI4LiW4Li54LiB4LiV4LmJ4Lit4LiHISIpCgpmYXZfY29sb3IgPSBpbnB1dCgi4Liq4Li14LiX4Li14LmI4LiE4Li44LiT4LiK4Lit4Lia4LiE4Li34Lit4Lit4Liw4LmE4LijOiAiKQpwcmludChmIuC4quC4o+C4uOC4m+C4guC5ieC4reC4oeC4ueC4pToge25hbWV9IOC4iuC4reC4muC4quC4tSB7ZmF2X2NvbG9yfSIpCnByaW50KCI9PT0g4LiI4Lia4LiB4Liy4Lij4LiX4Liz4LiH4Liy4LiZ4LmA4Lij4Li14Lii4Lia4Lij4LmJ4Lit4LiiID09PSIpCg=="
+}
