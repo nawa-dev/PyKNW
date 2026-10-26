@@ -1,0 +1,60 @@
+# ==========================================
+# ตัวอย่างการสร้างหน้าต่าง GUI ด้วย tkinter
+# ฝังมาในโปรแกรมแล้ว รันได้ทันทีไม่ต้องติดตั้งเพิ่ม!
+# ==========================================
+
+import tkinter as tk
+from tkinter import messagebox
+
+def on_click():
+    name = entry.get().strip()
+    if name:
+        messagebox.showinfo("ทักทาย", f"สวัสดีคุณ {name}!\nยินดีต้อนรับสู่ PyKNW Studio")
+    else:
+        messagebox.showwarning("แจ้งเตือน", "กรุณากรอกชื่อของคุณก่อนกดปุ่ม")
+
+# สร้างหน้าต่างหลัก
+root = tk.Tk()
+root.title("PyKNW Studio - ตัวอย่าง Tkinter GUI")
+root.geometry("380x220")
+root.configure(bg="#18181b")
+
+# ข้อความหัวข้อ
+title_label = tk.Label(
+    root, 
+    text="🐍 ตัวอย่างโปรแกรม GUI ด้วย Tkinter", 
+    font=("Segoe UI", 12, "bold"),
+    fg="#38bdf8", 
+    bg="#18181b"
+)
+title_label.pack(pady=15)
+
+# ช่องป้อนข้อความ
+entry = tk.Entry(
+    root, 
+    font=("Segoe UI", 11), 
+    width=25,
+    justify="center"
+)
+entry.insert(0, "ผู้ใช้งาน")
+entry.pack(pady=10)
+
+# ปุ่มกดยืนยัน
+btn = tk.Button(
+    root, 
+    text="กดเพื่อทักทาย", 
+    font=("Segoe UI", 10, "bold"),
+    bg="#16a34a", 
+    fg="white", 
+    padx=15, 
+    pady=5,
+    command=on_click,
+    relief="flat",
+    cursor="hand2"
+)
+btn.pack(pady=15)
+
+# เริ่มการทำงานของหน้าต่าง GUI
+print("กำลังเปิดหน้าต่าง Tkinter GUI...")
+root.mainloop()
+print("ปิดหน้าต่าง Tkinter เรียบร้อยแล้ว")

@@ -1,0 +1,19 @@
+# -*- coding: utf-8 -*-
+# ตัวอย่างการใช้งานฟังก์ชัน input() ใน PyKNW Studio
+
+print("=== ยินดีต้อนรับสู่ระบบทดสอบอินพุต ===")
+
+name = input("กรุณากรอกชื่อของคุณ: ")
+print(f"สวัสดีคุณ {name}!")
+
+age_str = input("กรุณากรอกอายุของคุณ (ตัวเลข): ")
+try:
+    age = int(age_str)
+    birth_year_be = 2567 - age
+    print(f"คุณ {name} เกิดประมาณ พ.ศ. {birth_year_be}")
+except ValueError:
+    print("คุณไม่ได้กรอกตัวเลขที่ถูกต้อง!")
+
+fav_color = input("สีที่คุณชอบคืออะไร: ")
+print(f"สรุปข้อมูล: {name} ชอบสี {fav_color}")
+print("=== จบการทำงานเรียบร้อย ===")

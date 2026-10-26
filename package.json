@@ -1,0 +1,80 @@
+{
+  "name": "pyknw-studio",
+  "version": "1.0.0",
+  "description": "Python Code Editor with Built-in Python Runtime and .pyknw Support",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "keywords": [
+    "python",
+    "editor",
+    "monaco",
+    "electron",
+    "pyknw"
+  ],
+  "author": "PyKNW Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nawa-dev/PyKNW.git"
+  },
+  "build": {
+    "appId": "com.pyknw.studio",
+    "productName": "PyKNW Studio",
+    "publish": {
+      "provider": "github",
+      "owner": "nawa-dev",
+      "repo": "PyKNW"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "node_modules/monaco-editor/min/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/python",
+        "to": "resources/python",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/runner.py",
+        "to": "resources/runner.py"
+      }
+    ],
+    "fileAssociations": [
+      {
+        "ext": "pyknw",
+        "name": "Python KNW Source File",
+        "description": "PyKNW Source Code File",
+        "role": "Editor",
+        "icon": "src/image/PyKNW.ico"
+      }
+    ],
+    "win": {
+      "icon": "src/image/PyKNW.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.4.11"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.57.0"
+  }
+}
