@@ -167,11 +167,17 @@ function updateTamperStatus() {
   if (currentTab && currentTab.isTampered) {
     tamperBanner.style.display = 'flex';
     if (tamperReasonText) {
-      tamperReasonText.textContent = currentTab.tamperedReason || 'ไฟล์นี้ไม่ผ่านการตรวจสอบลายเซ็นความปลอดภัย ปุ่ม [ รัน ] ถูกระงับการใช้งาน';
+      const teacherNote = isTeacherMode ? '🎓 [โหมดครูผู้สอน: ปลดล็อกการรันและบันทึก] ' : '';
+      tamperReasonText.textContent = teacherNote + (currentTab.tamperedReason || 'ไฟล์นี้ไม่ผ่านการตรวจสอบลายเซ็นความปลอดภัย ปุ่ม [ รัน ] ถูกระงับการใช้งาน');
     }
     if (btnRunStop) {
-      btnRunStop.classList.add('blocked');
-      btnRunStop.title = 'ปุ่มรันถูกระงับ: ตรวจพบการแก้ไขหรือวางโค้ดจาก Notepad';
+      if (isTeacherMode) {
+        btnRunStop.classList.remove('blocked');
+        btnRunStop.title = 'รันไฟล์ปัจจุบัน (โหมดครูผู้สอนอนุญาต)';
+      } else {
+        btnRunStop.classList.add('blocked');
+        btnRunStop.title = 'ปุ่มรันถูกระงับ: ตรวจพบการแก้ไขหรือวางโค้ดจาก Notepad';
+      }
     }
   } else {
     tamperBanner.style.display = 'none';
@@ -378,14 +384,32 @@ function setupClipboardShield() {
     handleProtectedPaste();
   }, true);
 
-  // Block External Drag & Drop
+  // Block External Drag & Drop (Unless Teacher Mode is on)
   window.addEventListener('dragover', (e) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'none';
+    if (isTeacherMode) {
+      e.dataTransfer.dropEffect = 'copy';
+    } else {
+      e.dataTransfer.dropEffect = 'none';
+    }
   });
 
   window.addEventListener('drop', (e) => {
     e.preventDefault();
+    if (isTeacherMode && e.dataTransfer) {
+      const droppedText = e.dataTransfer.getData('text');
+      if (droppedText && editor) {
+        internalClipboard = droppedText;
+        const position = editor.getPosition();
+        editor.executeEdits('teacher-drop', [{
+          range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+          text: droppedText,
+          forceMoveMarkers: true
+        }]);
+        showToast('🎓 ลากวางโค้ดสำเร็จ (โหมดครูผู้สอน)', 'success', 1500);
+        return;
+      }
+    }
     showToast('การวางถูกบล็อก: ไม่อนุญาตให้ลากวางโค้ดจากภายนอก', 'warning');
   });
 }
@@ -399,7 +423,20 @@ async function handleProtectedPaste() {
 
     if (!clipboardText) return;
 
-    // Compare with memory clipboard
+    // 🎓 โหมดครูผู้สอน: อนุญาตให้วางโค้ดจากภายนอกได้โดยตรง
+    if (isTeacherMode) {
+      internalClipboard = clipboardText;
+      const selection = editor.getSelection();
+      editor.executeEdits('teacher-paste', [{
+        range: selection,
+        text: clipboardText,
+        forceMoveMarkers: true
+      }]);
+      showToast('🎓 วางโค้ดจากภายนอกสำเร็จ (โหมดครูผู้สอน)', 'success', 1500);
+      return;
+    }
+
+    // Compare with memory clipboard (โหมดนักเรียน)
     if (internalClipboard !== null && clipboardText === internalClipboard) {
       const selection = editor.getSelection();
       editor.executeEdits('internal-paste', [{
@@ -554,8 +591,8 @@ async function runCode() {
   const currentTab = getCurrentTab();
   if (!currentTab) return;
 
-  // ตรวจจับการทุจริต: ไม่อนุญาตให้รันโค้ดที่แอบแก้ไขหรือนำเข้าจากภายนอก (Notepad)
-  if (currentTab.isTampered) {
+  // ตรวจจับการทุจริต: ไม่อนุญาตให้รันโค้ดที่แอบแก้ไขหรือนำเข้าจากภายนอก (ยกเว้นโหมดครูผู้สอน)
+  if (currentTab.isTampered && !isTeacherMode) {
     showToast('ไม่อนุญาตให้รันโค้ด: ตรวจพบว่าไฟล์นี้ถูกสร้างหรือแก้ไขจากภายนอก (Notepad)', 'warning', 4500);
     updateTamperStatus();
     return;
@@ -671,10 +708,16 @@ async function saveCurrentFile(forceSaveAs = false) {
   const currentTab = getCurrentTab();
   if (!currentTab) return false;
 
-  // ป้องกันการบันทึกทับเพื่อฟอกขาวโค้ดที่แอบแก้ไขจาก Notepad
-  if (currentTab.isTampered) {
+  // ป้องกันการบันทึกทับเพื่อฟอกขาวโค้ดที่แอบแก้ไขจาก Notepad (ยกเว้นโหมดครูผู้สอน)
+  if (currentTab.isTampered && !isTeacherMode) {
     showToast('ไม่อนุญาตให้บันทึกไฟล์นี้: ตรวจพบว่าไฟล์ถูกดัดแปลงจาก Notepad กรุณาสร้างแท็บไฟล์ใหม่เพื่อเขียนโค้ดด้วยตนเอง', 'warning', 5000);
     return false;
+  }
+
+  // หากเป็นโหมดครูผู้สอน ให้ปลดล็อกสถานะดัดแปลงเพื่อสร้างลายเซ็นใหม่
+  if (isTeacherMode && currentTab.isTampered) {
+    currentTab.isTampered = false;
+    currentTab.tamperedReason = null;
   }
 
   const content = currentTab.model.getValue();
@@ -1114,3 +1157,91 @@ if (appVersionStatus) {
     }
   });
 }
+
+// ==========================================
+// Secret Teacher Mode (GTA-Style Cheat Codes)
+// ==========================================
+let isTeacherMode = false;
+let cheatInputBuffer = '';
+let cheatBufferTimeout = null;
+const CHEAT_CODES = ['TEACHER', 'HESOYAM', 'PROFESSOR'];
+
+const teacherBadge = document.getElementById('teacherBadge');
+const teacherSep = document.getElementById('teacherSep');
+
+function toggleTeacherMode() {
+  isTeacherMode = !isTeacherMode;
+
+  if (teacherBadge) teacherBadge.style.display = isTeacherMode ? 'inline-flex' : 'none';
+  if (teacherSep) teacherSep.style.display = isTeacherMode ? 'inline' : 'none';
+
+  if (isTeacherMode) {
+    showToast('🎓 ปลดล็อกโหมดครูผู้สอน (Teacher Mode): อนุญาตให้ Copy/Paste โค้ดจากภายนอกได้แล้ว!', 'success', 3500);
+    const currentTab = getCurrentTab();
+    if (currentTab && currentTab.isTampered && btnRunStop) {
+      btnRunStop.classList.remove('blocked');
+      btnRunStop.title = 'รันโค้ด (โหมดครูผู้สอนอนุญาต)';
+    }
+  } else {
+    showToast('🔒 ปิดโหมดครูผู้สอน: ระบบบล็อกการวางจากภายนอกกลับมาทำงานตามปกติ', 'info', 2500);
+    updateTamperStatus();
+  }
+}
+
+// Click on teacher badge in status bar to toggle off
+if (teacherBadge) {
+  teacherBadge.addEventListener('click', toggleTeacherMode);
+}
+
+// Global Listener for GTA-Style Secret Cheat Codes & Secret Hotkeys
+window.addEventListener('keydown', (e) => {
+  // 1. Secret Hotkey: Ctrl + Alt + T
+  if (e.ctrlKey && e.altKey && (e.key === 't' || e.key === 'T')) {
+    e.preventDefault();
+    toggleTeacherMode();
+    return;
+  }
+
+  // 2. GTA-Style sequential typing (TEACHER or HESOYAM)
+  if (e.key && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && /[a-zA-Z]/i.test(e.key)) {
+    cheatInputBuffer += e.key.toUpperCase();
+
+    if (cheatInputBuffer.length > 20) {
+      cheatInputBuffer = cheatInputBuffer.slice(-20);
+    }
+
+    for (const code of CHEAT_CODES) {
+      if (cheatInputBuffer.endsWith(code)) {
+        cheatInputBuffer = '';
+
+        // If the cheat code was typed inside Monaco Editor, automatically erase the typed keyword!
+        if (editor && editor.hasTextFocus()) {
+          const selection = editor.getSelection();
+          const startCol = Math.max(1, selection.endColumn - code.length);
+          const rangeToDelete = new monaco.Range(
+            selection.endLineNumber,
+            startCol,
+            selection.endLineNumber,
+            selection.endColumn
+          );
+          const textInRange = editor.getModel().getValueInRange(rangeToDelete);
+          if (textInRange.toUpperCase() === code) {
+            editor.executeEdits('cheat-erase', [{
+              range: rangeToDelete,
+              text: '',
+              forceMoveMarkers: true
+            }]);
+          }
+        }
+
+        toggleTeacherMode();
+        break;
+      }
+    }
+
+    clearTimeout(cheatBufferTimeout);
+    cheatBufferTimeout = setTimeout(() => {
+      cheatInputBuffer = '';
+    }, 4000);
+  }
+}, true);
