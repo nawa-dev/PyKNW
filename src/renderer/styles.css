@@ -375,6 +375,11 @@ html, body {
   white-space: nowrap;
   transition: background 0.1s, color 0.1s;
   position: relative;
+  user-select: none;
+}
+
+.code-tab > *:not(.tab-close-btn) {
+  pointer-events: none;
 }
 
 .code-tab:hover {
@@ -390,8 +395,9 @@ html, body {
 
 /* Tab Drag and Drop Reordering */
 .code-tab.tab-dragging {
-  opacity: 0.45;
-  background-color: var(--border-active);
+  opacity: 0.5;
+  background-color: var(--border-active) !important;
+  cursor: grabbing !important;
 }
 
 .code-tab.drop-indicator-left {

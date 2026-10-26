@@ -259,13 +259,152 @@ function closeTab(tabId, e) {
   }
 }
 
-let draggedTabId = null;
+// ==========================================
+// Tab Drag and Drop Controller (Pointer/Mouse Engine)
+// ==========================================
+let tabDragState = null;
+let justFinishedTabDrag = false;
 
 function clearTabDropIndicators() {
   document.querySelectorAll('.code-tab').forEach(el => {
     el.classList.remove('drop-indicator-left', 'drop-indicator-right', 'tab-dragging');
   });
 }
+
+function handleTabMouseDown(e, tab, tabEl) {
+  if (e.button !== 0) return;
+  if (e.target.closest('.tab-close-btn')) return;
+
+  tabDragState = {
+    tabId: tab.id,
+    startX: e.clientX,
+    startY: e.clientY,
+    isDragging: false,
+    targetTabId: null,
+    insertPosition: null,
+    tabEl: tabEl
+  };
+}
+
+function initTabDragController() {
+  window.addEventListener('mousemove', (e) => {
+    if (!tabDragState) return;
+
+    const dx = e.clientX - tabDragState.startX;
+    const dy = e.clientY - tabDragState.startY;
+
+    if (!tabDragState.isDragging) {
+      if (Math.hypot(dx, dy) >= 4) {
+        tabDragState.isDragging = true;
+        document.body.style.cursor = 'grabbing';
+        document.body.style.userSelect = 'none';
+        tabDragState.tabEl.classList.add('tab-dragging');
+      } else {
+        return;
+      }
+    }
+
+    const tabElements = Array.from(tabsContainer.querySelectorAll('.code-tab'));
+    if (tabElements.length === 0) return;
+
+    clearTabDropIndicators();
+    tabDragState.tabEl.classList.add('tab-dragging');
+
+    const lastTabEl = tabElements[tabElements.length - 1];
+    const lastTabRect = lastTabEl.getBoundingClientRect();
+
+    // If mouse is to the right of the last tab (including empty space of tab bar)
+    if (e.clientX >= lastTabRect.right) {
+      tabDragState.targetTabId = lastTabEl.dataset.tabId;
+      tabDragState.insertPosition = 'after';
+      if (lastTabEl.dataset.tabId !== tabDragState.tabId) {
+        lastTabEl.classList.add('drop-indicator-right');
+      }
+      return;
+    }
+
+    // If mouse is to the left of the first tab
+    const firstTabEl = tabElements[0];
+    const firstTabRect = firstTabEl.getBoundingClientRect();
+    if (e.clientX <= firstTabRect.left) {
+      tabDragState.targetTabId = firstTabEl.dataset.tabId;
+      tabDragState.insertPosition = 'before';
+      if (firstTabEl.dataset.tabId !== tabDragState.tabId) {
+        firstTabEl.classList.add('drop-indicator-left');
+      }
+      return;
+    }
+
+    // Otherwise, find which tab the mouse is over
+    for (let i = 0; i < tabElements.length; i++) {
+      const el = tabElements[i];
+      const rect = el.getBoundingClientRect();
+      if (e.clientX >= rect.left && e.clientX <= rect.right) {
+        const mid = rect.left + rect.width / 2;
+        tabDragState.targetTabId = el.dataset.tabId;
+        if (e.clientX < mid) {
+          tabDragState.insertPosition = 'before';
+          if (el.dataset.tabId !== tabDragState.tabId) {
+            el.classList.add('drop-indicator-left');
+          }
+        } else {
+          tabDragState.insertPosition = 'after';
+          if (el.dataset.tabId !== tabDragState.tabId) {
+            el.classList.add('drop-indicator-right');
+          }
+        }
+        break;
+      }
+    }
+  });
+
+  window.addEventListener('mouseup', (e) => {
+    if (!tabDragState) return;
+
+    const wasDragging = tabDragState.isDragging;
+    const sourceId = tabDragState.tabId;
+    const targetId = tabDragState.targetTabId;
+    const insertPos = tabDragState.insertPosition;
+
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    clearTabDropIndicators();
+    tabDragState = null;
+
+    if (wasDragging) {
+      justFinishedTabDrag = true;
+      setTimeout(() => { justFinishedTabDrag = false; }, 80);
+
+      if (sourceId && targetId && sourceId !== targetId) {
+        const fromIndex = tabs.findIndex(t => t.id === sourceId);
+        if (fromIndex !== -1) {
+          const [movedTab] = tabs.splice(fromIndex, 1);
+          let targetIndex = tabs.findIndex(t => t.id === targetId);
+          if (targetIndex !== -1) {
+            if (insertPos === 'after') {
+              targetIndex += 1;
+            }
+            tabs.splice(targetIndex, 0, movedTab);
+            renderTabs();
+          } else {
+            tabs.splice(fromIndex, 0, movedTab);
+          }
+        }
+      }
+    }
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && tabDragState && tabDragState.isDragging) {
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      clearTabDropIndicators();
+      tabDragState = null;
+    }
+  });
+}
+
+initTabDragController();
 
 function renderTabs() {
   tabsContainer.innerHTML = '';
@@ -274,70 +413,14 @@ function renderTabs() {
     const tabEl = document.createElement('div');
     const tamperedClass = tab.isTampered ? 'tampered' : '';
     tabEl.className = `code-tab ${tab.id === activeTabId ? 'active' : ''} ${tab.isDirty ? 'dirty' : ''} ${tamperedClass}`;
-    tabEl.onclick = () => switchTab(tab.id);
-
-    // Enable HTML5 Drag & Drop for reordering
-    tabEl.setAttribute('draggable', 'true');
     tabEl.dataset.tabId = tab.id;
 
-    tabEl.addEventListener('dragstart', (e) => {
-      draggedTabId = tab.id;
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', tab.id);
-      setTimeout(() => {
-        tabEl.classList.add('tab-dragging');
-      }, 0);
-    });
+    tabEl.addEventListener('mousedown', (e) => handleTabMouseDown(e, tab, tabEl));
 
-    tabEl.addEventListener('dragend', () => {
-      draggedTabId = null;
-      clearTabDropIndicators();
-    });
-
-    tabEl.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (!draggedTabId || draggedTabId === tab.id) return;
-
-      const rect = tabEl.getBoundingClientRect();
-      const midPoint = rect.left + rect.width / 2;
-      clearTabDropIndicators();
-      if (e.clientX < midPoint) {
-        tabEl.classList.add('drop-indicator-left');
-      } else {
-        tabEl.classList.add('drop-indicator-right');
-      }
-    });
-
-    tabEl.addEventListener('dragleave', (e) => {
-      if (!tabEl.contains(e.relatedTarget)) {
-        tabEl.classList.remove('drop-indicator-left', 'drop-indicator-right');
-      }
-    });
-
-    tabEl.addEventListener('drop', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const sourceId = draggedTabId || e.dataTransfer.getData('text/plain');
-      clearTabDropIndicators();
-
-      if (!sourceId || sourceId === tab.id) return;
-
-      const fromIndex = tabs.findIndex(t => t.id === sourceId);
-      if (fromIndex === -1) return;
-
-      const rect = tabEl.getBoundingClientRect();
-      const isAfter = e.clientX >= (rect.left + rect.width / 2);
-
-      const [movedTab] = tabs.splice(fromIndex, 1);
-      let targetIndex = tabs.findIndex(t => t.id === tab.id);
-      if (isAfter) {
-        targetIndex += 1;
-      }
-      tabs.splice(targetIndex, 0, movedTab);
-
-      renderTabs();
-    });
+    tabEl.onclick = () => {
+      if (justFinishedTabDrag) return;
+      switchTab(tab.id);
+    };
 
     const iconSpan = document.createElement('span');
     iconSpan.className = 'tab-file-icon';
@@ -357,11 +440,13 @@ function renderTabs() {
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'tab-close-btn';
-    closeBtn.setAttribute('draggable', 'false');
     closeBtn.title = 'ปิดแท็บ (Ctrl+W)';
     closeBtn.innerHTML = `<svg width="10" height="10" viewBox="0 0 12 12"><polygon fill="currentColor" points="11 1.41 9.59 0 5.5 4.09 1.41 0 0 1.41 4.09 5.5 0 9.59 1.41 11 5.5 6.91 9.59 11 11 9.59 6.91 5.5"></polygon></svg>`;
     closeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-    closeBtn.onclick = (e) => closeTab(tab.id, e);
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      closeTab(tab.id, e);
+    };
 
     tabEl.appendChild(iconSpan);
     tabEl.appendChild(titleSpan);
@@ -1025,55 +1110,6 @@ if (btnTraceSpeed) btnTraceSpeed.addEventListener('click', cycleTraceSpeed);
 if (btnThemeToggle) btnThemeToggle.addEventListener('click', toggleTheme);
 btnClear.addEventListener('click', clearOutput);
 btnToggleLayout.addEventListener('click', toggleConsoleLayout);
-
-// Allow dropping onto empty space in tabs container or header (moves dragged tab to the end)
-const tabsHeaderEl = document.querySelector('.tabs-header');
-
-if (tabsHeaderEl) {
-  tabsHeaderEl.addEventListener('dragover', (e) => {
-    if (!draggedTabId) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-
-    // If mouse is not over a specific .code-tab (i.e. empty bar or new tab button)
-    const tabEl = e.target.closest('.code-tab');
-    if (!tabEl) {
-      clearTabDropIndicators();
-      const allTabs = tabsContainer.querySelectorAll('.code-tab');
-      if (allTabs.length > 0) {
-        const lastTab = allTabs[allTabs.length - 1];
-        if (lastTab.dataset.tabId !== draggedTabId) {
-          lastTab.classList.add('drop-indicator-right');
-        }
-      }
-    }
-  });
-
-  tabsHeaderEl.addEventListener('dragleave', (e) => {
-    if (!tabsHeaderEl.contains(e.relatedTarget)) {
-      clearTabDropIndicators();
-    }
-  });
-
-  tabsHeaderEl.addEventListener('drop', (e) => {
-    if (!draggedTabId) return;
-    e.preventDefault();
-    clearTabDropIndicators();
-
-    const fromIndex = tabs.findIndex(t => t.id === draggedTabId);
-    if (fromIndex !== -1 && fromIndex !== tabs.length - 1) {
-      const [movedTab] = tabs.splice(fromIndex, 1);
-      tabs.push(movedTab);
-      renderTabs();
-    }
-  });
-}
-
-// Global cleanup when drag ends (including Esc cancellation)
-window.addEventListener('dragend', () => {
-  draggedTabId = null;
-  clearTabDropIndicators();
-});
 
 if (btnConsoleZoomIn) btnConsoleZoomIn.addEventListener('click', zoomConsoleInOnly);
 if (btnConsoleZoomOut) btnConsoleZoomOut.addEventListener('click', zoomConsoleOutOnly);
