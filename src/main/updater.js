@@ -250,6 +250,36 @@ function setupAutoUpdater(mainWindow) {
   // Start download & install
   ipcMain.handle('updater:download', async (event, updateInfo) => {
     try {
+      if (updateInfo && updateInfo.isMock) {
+        // จำลองการดาวน์โหลดเสมือนจริง (Progress 0% -> 100%) สำหรับการทดสอบ
+        let percent = 0;
+        const totalMB = 84.5;
+        const interval = setInterval(() => {
+          percent += 15;
+          if (percent >= 100) {
+            percent = 100;
+            clearInterval(interval);
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.webContents.send('update:download-progress', {
+                percent: 100,
+                downloaded: '84.5 MB',
+                total: '84.5 MB'
+              });
+              mainWindow.webContents.send('update:download-complete');
+            }
+          } else {
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.webContents.send('update:download-progress', {
+                percent,
+                downloaded: `${((totalMB * percent) / 100).toFixed(1)} MB`,
+                total: `${totalMB} MB`
+              });
+            }
+          }
+        }, 250);
+        return { success: true };
+      }
+
       await downloadAndInstall(mainWindow, updateInfo);
       return { success: true };
     } catch (err) {
@@ -276,7 +306,8 @@ function setupAutoUpdater(mainWindow) {
       downloadUrl: `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v1.1.0/PyKNW-Setup-1.1.0.exe`,
       assetName: 'PyKNW-Setup-1.1.0.exe',
       assetSize: '84.5 MB',
-      isDirectInstaller: false // Safe for simulation without crashing
+      isDirectInstaller: true, // แสดงปุ่ม "อัปเดตทันที" พร้อมแถบโหลดอัตโนมัติ
+      isMock: true
     };
 
     if (mainWindow && !mainWindow.isDestroyed()) {
