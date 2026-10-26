@@ -72,7 +72,8 @@
     }
   },
   "devDependencies": {
-    "electron": "^33.4.11"
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
   },
   "dependencies": {
     "monaco-editor": "^0.57.0"
