@@ -300,7 +300,7 @@ function setupAutoUpdater(mainWindow) {
       currentVersion,
       newVersion: '1.1.0',
       releaseTitle: 'PyKNW Studio v1.1.0 (อัปเดตใหม่)',
-      releaseNotes: `### ✨ มีอะไรใหม่ใน v1.1.0\n- เพิ่มระบบรองรับฟังก์ชัน \`input()\` แบบ Interactive ในหน้าต่าง Console\n- เพิ่มปุ่มบันทึกเป็น (Save As) และระบบบันทึกอัตโนมัติก่อนรันโค้ด\n- ปรับปรุงการแปลข้อผิดพลาดภาษาไทยให้เข้าใจง่ายยิ่งขึ้น\n- เพิ่มระบบตรวจจับและอัปเดตเวอร์ชันใหม่อัตโนมัติจาก GitHub Releases`,
+      releaseNotes: `### มีอะไรใหม่ใน v1.1.0\n- เพิ่มระบบรองรับฟังก์ชัน \`input()\` แบบ Interactive ในหน้าต่าง Console\n- เพิ่มปุ่มบันทึกเป็น (Save As) และระบบบันทึกอัตโนมัติก่อนรันโค้ด\n- ปรับปรุงการแปลข้อผิดพลาดภาษาไทยให้เข้าใจง่ายยิ่งขึ้น\n- เพิ่มระบบตรวจจับและอัปเดตเวอร์ชันใหม่อัตโนมัติจาก GitHub Releases`,
       publishedAt: new Date().toLocaleDateString('th-TH'),
       htmlUrl: `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases`,
       downloadUrl: `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v1.1.0/PyKNW-Setup-1.1.0.exe`,

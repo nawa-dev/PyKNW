@@ -166,11 +166,11 @@ def translate_error(exc_type, exc_value, tb, script_path):
 def print_thai_error(err_info):
     sep = "=" * 65
     print("\n" + sep, file=sys.stderr)
-    print(f"❌ เกิดข้อผิดพลาด: {err_info['title']}", file=sys.stderr)
+    print(f"[ข้อผิดพลาด]: {err_info['title']}", file=sys.stderr)
     if err_info["line_no"]:
         code_str = f" -> {err_info['line_code']}" if err_info["line_code"] else ""
-        print(f"📍 ตำแหน่ง: บรรทัดที่ {err_info['line_no']}{code_str}", file=sys.stderr)
-    print(f"💡 คำอธิบาย: {err_info['description']}", file=sys.stderr)
+        print(f"[ตำแหน่ง]: บรรทัดที่ {err_info['line_no']}{code_str}", file=sys.stderr)
+    print(f"[คำอธิบาย]: {err_info['description']}", file=sys.stderr)
     print(sep + "\n", file=sys.stderr)
 
 # Setup execution

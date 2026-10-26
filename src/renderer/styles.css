@@ -757,31 +757,33 @@ html, body {
 }
 
 .console-send-btn {
-  background: #2563eb;
-  color: #ffffff;
+  background: transparent;
+  color: #cccccc;
   border: none;
   outline: none;
-  padding: 4px 10px;
+  padding: 3px 8px;
+  height: 24px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-family: var(--font-sans);
-  font-weight: 500;
+  font-weight: normal;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   cursor: pointer;
-  transition: background 0.15s ease, opacity 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .console-send-btn:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 .console-send-btn:disabled {
-  background: #27272a;
+  background: transparent;
   color: #52525b;
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 /* ==================================================== */
@@ -905,17 +907,18 @@ html, body {
 /* Toolbar Update Button & Badge                        */
 /* ==================================================== */
 .tool-btn.btn-update {
-  background: rgba(14, 165, 233, 0.15) !important;
-  color: #38bdf8 !important;
-  border: 1px solid rgba(56, 189, 248, 0.4) !important;
-  font-weight: 500;
+  background: transparent !important;
+  color: #cccccc !important;
+  border: none !important;
+  outline: none !important;
+  font-weight: normal;
   position: relative;
   padding-right: 18px;
 }
 
 .tool-btn.btn-update:hover {
-  background: rgba(14, 165, 233, 0.28) !important;
-  border-color: #38bdf8 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
 }
 
 .update-badge-dot {

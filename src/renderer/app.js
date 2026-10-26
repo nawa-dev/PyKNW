@@ -167,7 +167,7 @@ function updateTamperStatus() {
   if (currentTab && currentTab.isTampered) {
     tamperBanner.style.display = 'flex';
     if (tamperReasonText) {
-      const teacherNote = isTeacherMode ? '🎓 [โหมดครูผู้สอน: ปลดล็อกการรันและบันทึก] ' : '';
+      const teacherNote = isTeacherMode ? '[โหมดครูผู้สอน: ปลดล็อกการรันและบันทึก] ' : '';
       tamperReasonText.textContent = teacherNote + (currentTab.tamperedReason || 'ไฟล์นี้ไม่ผ่านการตรวจสอบลายเซ็นความปลอดภัย ปุ่ม [ รัน ] ถูกระงับการใช้งาน');
     }
     if (btnRunStop) {
@@ -239,7 +239,7 @@ function renderTabs() {
 
     const titleSpan = document.createElement('span');
     titleSpan.className = 'tab-title';
-    titleSpan.textContent = tab.isTampered ? `⚠️ ${tab.title}` : tab.title;
+    titleSpan.textContent = tab.title;
 
     const dotSpan = document.createElement('span');
     dotSpan.className = 'tab-status-dot';
@@ -406,7 +406,7 @@ function setupClipboardShield() {
           text: droppedText,
           forceMoveMarkers: true
         }]);
-        showToast('🎓 ลากวางโค้ดสำเร็จ (โหมดครูผู้สอน)', 'success', 1500);
+        showToast('ลากวางโค้ดสำเร็จ (โหมดครูผู้สอน)', 'success', 1500);
         return;
       }
     }
@@ -423,7 +423,7 @@ async function handleProtectedPaste() {
 
     if (!clipboardText) return;
 
-    // 🎓 โหมดครูผู้สอน: อนุญาตให้วางโค้ดจากภายนอกได้โดยตรง
+    // โหมดครูผู้สอน: อนุญาตให้วางโค้ดจากภายนอกได้โดยตรง
     if (isTeacherMode) {
       internalClipboard = clipboardText;
       const selection = editor.getSelection();
@@ -432,7 +432,7 @@ async function handleProtectedPaste() {
         text: clipboardText,
         forceMoveMarkers: true
       }]);
-      showToast('🎓 วางโค้ดจากภายนอกสำเร็จ (โหมดครูผู้สอน)', 'success', 1500);
+      showToast('วางโค้ดจากภายนอกสำเร็จ (โหมดครูผู้สอน)', 'success', 1500);
       return;
     }
 
@@ -1176,14 +1176,14 @@ function toggleTeacherMode() {
   if (teacherSep) teacherSep.style.display = isTeacherMode ? 'inline' : 'none';
 
   if (isTeacherMode) {
-    showToast('🎓 ปลดล็อกโหมดครูผู้สอน (Teacher Mode): อนุญาตให้ Copy/Paste โค้ดจากภายนอกได้แล้ว!', 'success', 3500);
+    showToast('ปลดล็อกโหมดครูผู้สอน (Teacher Mode): อนุญาตให้วางโค้ดจากภายนอกได้', 'success', 3500);
     const currentTab = getCurrentTab();
     if (currentTab && currentTab.isTampered && btnRunStop) {
       btnRunStop.classList.remove('blocked');
       btnRunStop.title = 'รันโค้ด (โหมดครูผู้สอนอนุญาต)';
     }
   } else {
-    showToast('🔒 ปิดโหมดครูผู้สอน: ระบบบล็อกการวางจากภายนอกกลับมาทำงานตามปกติ', 'info', 2500);
+    showToast('ปิดโหมดครูผู้สอน: ระบบบล็อกการวางจากภายนอกกลับมาทำงานตามปกติ', 'info', 2500);
     updateTamperStatus();
   }
 }
