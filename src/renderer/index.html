@@ -174,43 +174,6 @@
               </svg>
               <span id="themeToggleText">สว่าง</span>
             </button>
-
-            <button
-              id="btnTraceSpeed"
-              class="tool-btn btn-trace"
-              title="สลับความเร็วไฮไลต์ทีละบรรทัด (Step Delay)"
-            >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              <span id="traceSpeedLabel">หน่วง: 0.3วิ</span>
-            </button>
-
-            <!-- Merged Run / Stop Button -->
-            <button
-              id="btnRunStop"
-              class="tool-btn btn-run"
-              title="รันไฟล์ปัจจุบัน (F5 หรือ Ctrl+Enter)"
-            >
-              <svg
-                id="runStopIcon"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-              <span id="runStopText">รัน</span>
-            </button>
           </div>
 
           <div class="window-controls">
@@ -263,26 +226,68 @@
         <section class="editor-section">
           <!-- Separate Code Tabs Bar (Above Editor) -->
           <div class="tabs-header">
-            <div class="tabs-scroll" id="tabsContainer">
-              <!-- Dynamic Tab items inserted here -->
-            </div>
-            <button
-              id="btnNewTab"
-              class="tab-add-btn"
-              title="สร้างแท็บใหม่ (Ctrl+N)"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
+            <div class="tabs-left">
+              <div class="tabs-scroll" id="tabsContainer">
+                <!-- Dynamic Tab items inserted here -->
+              </div>
+              <button
+                id="btnNewTab"
+                class="tab-add-btn"
+                title="สร้างแท็บใหม่ (Ctrl+N)"
               >
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Execution Controls (Aligned Right in Tabs Bar) -->
+            <div class="tabs-actions">
+              <button
+                id="btnTraceSpeed"
+                class="tool-btn btn-trace"
+                title="สลับความเร็วไฮไลต์ทีละบรรทัด (Step Delay)"
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="traceSpeedLabel">หน่วง: 0.3วิ</span>
+              </button>
+
+              <!-- Merged Run / Stop Button -->
+              <button
+                id="btnRunStop"
+                class="tool-btn btn-run"
+                title="รันไฟล์ปัจจุบัน (F5 หรือ Ctrl+Enter)"
+              >
+                <svg
+                  id="runStopIcon"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span id="runStopText">รัน</span>
+              </button>
+            </div>
           </div>
 
           <!-- Monaco Editor Host -->

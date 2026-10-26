@@ -130,6 +130,31 @@ require(['vs/editor/editor.main'], function () {
   // Setup Window Controls (Frameless Titlebar)
   setupWindowControls();
 
+  // Setup Editor Context Menu (Right-Click Actions: Zoom In, Out, Reset)
+  editor.addAction({
+    id: 'pyknw-zoom-in',
+    label: 'ขยายหน้าโค้ด (Zoom In)',
+    contextMenuGroupId: 'z_zoom',
+    contextMenuOrder: 1,
+    run: () => zoomIn()
+  });
+
+  editor.addAction({
+    id: 'pyknw-zoom-out',
+    label: 'ย่อหน้าโค้ด (Zoom Out)',
+    contextMenuGroupId: 'z_zoom',
+    contextMenuOrder: 2,
+    run: () => zoomOut()
+  });
+
+  editor.addAction({
+    id: 'pyknw-zoom-reset',
+    label: 'รีเซ็ตขนาดโค้ด (100%)',
+    contextMenuGroupId: 'z_zoom',
+    contextMenuOrder: 3,
+    run: () => resetZoom()
+  });
+
   // Create initial demo tab
   const sampleCode = `# PyKNW Studio - โปรแกรมเขียนโค้ดภาษา Python (.pyknw)
 # ทำงานได้ทันทีโดยไม่ต้องติดตั้ง Python ลงในเครื่อง
