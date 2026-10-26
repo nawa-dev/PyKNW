@@ -4,13 +4,14 @@
 
 ---
 
-### 1.  ห้ามใช้ Emoji เด็ดขาด (Strictly No Emojis)
-- **ห้ามมีตัวอักษร Emoji** ในทุกส่วนของระบบ ไม่ว่าจะเป็น:
+### 1.  ห้ามใช้ Emoji ในโค้ดและส่วนติดต่อผู้ใช้ (No Emojis in Code & UI)
+- **ห้ามมีตัวอักษร Emoji** ในทุกส่วนของโค้ดและหน้าต่าง UI ได้แก่:
   - หน้าต่าง UI, ป้ายชื่อ (Title), ป้ายกำกับ (Labels)
-  - ข้อความแจ้งเตือน (Toasts, Alerts, Notifications)
+  - ข้อความแจ้งเตือน (Toasts, Alerts, Notifications, Modals)
   - ชื่อแท็บ (Tab titles) หรือแถบสถานะ (Status Bar)
   - กล่องข้อความแจ้งข้อผิดพลาด (Console Error Diagnostics)
 - **แนวทางปฏิบัติ:** ให้ใช้ **Vector SVG Icons** หรือข้อความภาษาไทยธรรมดาที่มีความหมายชัดเจนและเข้ากับธีม Modern Dark IDE สไตล์ VS Code เสมอ
+- **ข้อยกเว้นพิเศษ:** อนุญาตให้ใช้ Emoji ได้เฉพาะในเอกสาร **README.md** และ **RELEASE_NOTES.md** (หรือ Release Notes บน GitHub) เพื่อเพิ่มความน่าอ่านและเป็นมิตรกับผู้ใช้งาน
 
 ---
 
