@@ -482,6 +482,12 @@ function renderTabs() {
   });
 
   tabCountStatusEl.textContent = `เปิดอยู่ ${tabs.length} แท็บ`;
+
+  // Synchronize unsaved status with main process for quit protection
+  if (window.pyknwAPI && window.pyknwAPI.setUnsavedStatus) {
+    const dirtyList = tabs.filter(t => t.isDirty).map(t => t.title);
+    window.pyknwAPI.setUnsavedStatus(dirtyList);
+  }
 }
 
 function getCurrentTab() {

@@ -9,6 +9,8 @@ const { packContainer, unpackContainer } = require('./security');
 let mainWindow = null;
 let currentChildProcess = null;
 let fileToOpenOnStartup = null;
+let unsavedFiles = [];
+let isForceQuit = false;
 
 // Determine path to bundled Python embeddable executable
 function getBundledPythonPath() {
@@ -77,6 +79,33 @@ function createWindow() {
   mainWindow.on('unmaximize', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('window:maximize-change', false);
+    }
+  });
+
+  mainWindow.on('close', (e) => {
+    if (isForceQuit) return;
+
+    if (unsavedFiles.length > 0) {
+      e.preventDefault();
+      const fileNames = unsavedFiles.join(', ');
+      const detailMsg = unsavedFiles.length === 1
+        ? `ไฟล์ "${fileNames}" มีการแก้ไขที่ยังไม่ได้บันทึก\nหากปิดโปรแกรม ข้อมูลที่แก้ไขล่าสุดจะสูญหาย`
+        : `มีไฟล์ที่ยังไม่ได้บันทึกจำนวน ${unsavedFiles.length} ไฟล์ (${fileNames})\nหากปิดโปรแกรม ข้อมูลที่แก้ไขล่าสุดจะสูญหาย`;
+
+      const choice = dialog.showMessageBoxSync(mainWindow, {
+        type: 'warning',
+        buttons: ['ปิดโปรแกรม (ไม่บันทึก)', 'ยกเลิก'],
+        defaultId: 1,
+        cancelId: 1,
+        title: 'ยืนยันการปิดโปรแกรม',
+        message: 'มีไฟล์ที่ยังไม่ได้บันทึก ต้องการปิดโปรแกรมหรือไม่?',
+        detail: detailMsg
+      });
+
+      if (choice === 0) {
+        isForceQuit = true;
+        mainWindow.close();
+      }
     }
   });
 
@@ -152,10 +181,19 @@ if (!gotTheLock) {
   });
 }
 
+app.on('before-quit', () => {
+  isForceQuit = true;
+});
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+// IPC Handler: Synchronize Unsaved Files Status
+ipcMain.on('app:set-unsaved-status', (event, dirtyList) => {
+  unsavedFiles = Array.isArray(dirtyList) ? dirtyList : [];
 });
 
 // IPC Handler: Window Controls

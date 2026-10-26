@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('pyknwAPI', {
   maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
   closeWindow: () => ipcRenderer.invoke('window:close'),
   isMaximized: () => ipcRenderer.invoke('window:is-maximized'),
+  setUnsavedStatus: (dirtyList) => ipcRenderer.send('app:set-unsaved-status', dirtyList),
   onMaximizeChange: (callback) => {
     const handler = (event, isMax) => callback(isMax);
     ipcRenderer.on('window:maximize-change', handler);
