@@ -113,7 +113,7 @@ npm run dist
 ใช้ GitHub CLI สั่งสร้าง Release และแนบไฟล์ `.exe` ขึ้น GitHub ทันที:
 
 ```powershell
-gh release create v1.2.1 "dist/KNW-Py Setup 1.2.1.exe" --title "KNW-Py v1.2.1" --notes-file RELEASE_NOTES.md
+gh release create v1.2.2 "dist/KNW-Py Setup 1.2.2.exe" --title "KNW-Py v1.2.2" --notes-file RELEASE_NOTES.md
 ```
 
 > **คำอธิบายพารามิเตอร์:**

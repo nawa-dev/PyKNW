@@ -1,7 +1,7 @@
 {
   "name": "pyknw-studio",
   "productName": "KNW-Py",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Python Code Editor with Built-in Python Runtime and .pyknw Support",
   "main": "src/main/index.js",
   "scripts": {
