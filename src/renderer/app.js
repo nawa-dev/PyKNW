@@ -12,8 +12,10 @@ const DEFAULT_CONSOLE_FONT_SIZE = 12.5;
 let currentFontSize = DEFAULT_FONT_SIZE;
 let currentConsoleFontSize = DEFAULT_CONSOLE_FONT_SIZE;
 
-// Security: In-Memory Internal Clipboard State
+// Security: In-Memory Internal Clipboard State & History
 let internalClipboard = null;
+const internalClipboardHistory = new Set();
+let isPasting = false;
 
 // Product Name Synchronization (Single Source of Truth from package.json)
 let APP_PRODUCT_NAME = 'KNW-Py';
@@ -608,21 +610,140 @@ function updateZoomUI() {
 // ==========================================
 // Anti-External Copy-Paste Security System
 // ==========================================
+function normalizeClipboardText(text) {
+  if (typeof text !== 'string') return '';
+  return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
+
+function registerInternalClipboard(text) {
+  if (!text || typeof text !== 'string') return;
+  internalClipboard = text;
+  const norm = normalizeClipboardText(text);
+  internalClipboardHistory.add(norm);
+  const trimmed = norm.trim();
+  if (trimmed) {
+    internalClipboardHistory.add(trimmed);
+  }
+
+  // Prevent unbounded growth of history set
+  if (internalClipboardHistory.size > 150) {
+    const it = internalClipboardHistory.values();
+    internalClipboardHistory.delete(it.next().value);
+  }
+}
+
+function isInternalClipboard(text) {
+  if (!text || typeof text !== 'string') return false;
+  const norm = normalizeClipboardText(text);
+  if (internalClipboard !== null && normalizeClipboardText(internalClipboard) === norm) {
+    return true;
+  }
+  if (internalClipboardHistory.has(norm)) {
+    return true;
+  }
+  const trimmed = norm.trim();
+  if (trimmed && internalClipboardHistory.has(trimmed)) {
+    return true;
+  }
+  return false;
+}
+
+async function getSysClipboardText() {
+  try {
+    if (window.pyknwAPI && window.pyknwAPI.readClipboard) {
+      const text = await window.pyknwAPI.readClipboard();
+      if (typeof text === 'string') return text;
+    }
+  } catch (err) {
+    console.warn('Native clipboard read error:', err);
+  }
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      return await navigator.clipboard.readText();
+    }
+  } catch (err) {
+    console.warn('Navigator clipboard read error:', err);
+  }
+
+  return '';
+}
+
+function executeEditorPaste(text, editSource = 'internal-paste') {
+  if (!editor) return;
+  const selection = editor.getSelection() || new monaco.Range(1, 1, 1, 1);
+
+  editor.pushUndoStop();
+  editor.executeEdits(editSource, [{
+    range: selection,
+    text: text,
+    forceMoveMarkers: true
+  }]);
+  editor.pushUndoStop();
+
+  // Move cursor to the end of the pasted text
+  const normalized = normalizeClipboardText(text);
+  const lines = normalized.split('\n');
+  const endLineNumber = selection.startLineNumber + lines.length - 1;
+  const endColumn = lines.length === 1
+    ? selection.startColumn + lines[0].length
+    : lines[lines.length - 1].length + 1;
+
+  const newSelection = new monaco.Selection(endLineNumber, endColumn, endLineNumber, endColumn);
+  editor.setSelection(newSelection);
+  editor.revealPosition(new monaco.Position(endLineNumber, endColumn));
+  editor.focus();
+}
+
 function setupClipboardShield() {
+  // Global Window Copy/Cut listener (captures any copy action within the app window)
+  const captureWindowCopy = () => {
+    setTimeout(async () => {
+      const text = await getSysClipboardText();
+      if (text) {
+        registerInternalClipboard(text);
+      }
+    }, 20);
+  };
+
+  window.addEventListener('copy', captureWindowCopy, true);
+  window.addEventListener('cut', captureWindowCopy, true);
+
+  // Monaco Keyboard interception
   editor.onKeyDown((e) => {
     const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+    const isKeyC = e.keyCode === monaco.KeyCode.KeyC || (e.browserEvent && e.browserEvent.code === 'KeyC');
+    const isKeyX = e.keyCode === monaco.KeyCode.KeyX || (e.browserEvent && e.browserEvent.code === 'KeyX');
+    const isKeyV = e.keyCode === monaco.KeyCode.KeyV || (e.browserEvent && e.browserEvent.code === 'KeyV');
 
     // Capture Copy (Ctrl+C) or Cut (Ctrl+X)
-    if (isCtrlOrCmd && (e.keyCode === monaco.KeyCode.KeyC || e.keyCode === monaco.KeyCode.KeyX)) {
+    if (isCtrlOrCmd && (isKeyC || isKeyX)) {
       const selection = editor.getSelection();
-      const selectedText = editor.getModel().getValueInRange(selection);
-      if (selectedText) {
-        internalClipboard = selectedText;
+      if (selection && !selection.isEmpty()) {
+        const selectedText = editor.getModel().getValueInRange(selection);
+        if (selectedText) {
+          registerInternalClipboard(selectedText);
+        }
+      } else {
+        // Line copy when no text is selected
+        const pos = editor.getPosition();
+        if (pos) {
+          const lineContent = editor.getModel().getLineContent(pos.lineNumber);
+          registerInternalClipboard(lineContent);
+          registerInternalClipboard(lineContent + '\n');
+          registerInternalClipboard(lineContent + '\r\n');
+        }
       }
+
+      // Confirm with OS clipboard once Monaco writes to it
+      setTimeout(async () => {
+        const text = await getSysClipboardText();
+        if (text) registerInternalClipboard(text);
+      }, 25);
     }
 
     // Capture Paste (Ctrl+V)
-    if (isCtrlOrCmd && e.keyCode === monaco.KeyCode.KeyV) {
+    if (isCtrlOrCmd && isKeyV) {
       e.preventDefault();
       e.stopPropagation();
       handleProtectedPaste();
@@ -651,7 +772,7 @@ function setupClipboardShield() {
     if (isTeacherMode && e.dataTransfer) {
       const droppedText = e.dataTransfer.getData('text');
       if (droppedText && editor) {
-        internalClipboard = droppedText;
+        registerInternalClipboard(droppedText);
         const position = editor.getPosition();
         editor.executeEdits('teacher-drop', [{
           range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
@@ -667,41 +788,35 @@ function setupClipboardShield() {
 }
 
 async function handleProtectedPaste() {
-  try {
-    let clipboardText = '';
-    if (navigator.clipboard && navigator.clipboard.readText) {
-      clipboardText = await navigator.clipboard.readText();
-    }
+  if (isPasting) return;
+  isPasting = true;
 
+  try {
+    const clipboardText = await getSysClipboardText();
     if (!clipboardText) return;
 
     // โหมดครูผู้สอน: อนุญาตให้วางโค้ดจากภายนอกได้โดยตรง
     if (isTeacherMode) {
-      internalClipboard = clipboardText;
-      const selection = editor.getSelection();
-      editor.executeEdits('teacher-paste', [{
-        range: selection,
-        text: clipboardText,
-        forceMoveMarkers: true
-      }]);
+      registerInternalClipboard(clipboardText);
+      executeEditorPaste(clipboardText, 'teacher-paste');
       showToast('วางโค้ดจากภายนอกสำเร็จ (โหมดครูผู้สอน)', 'success', 1500);
       return;
     }
 
-    // Compare with memory clipboard (โหมดนักเรียน)
-    if (internalClipboard !== null && clipboardText === internalClipboard) {
-      const selection = editor.getSelection();
-      editor.executeEdits('internal-paste', [{
-        range: selection,
-        text: clipboardText,
-        forceMoveMarkers: true
-      }]);
+    // โหมดนักเรียน: ตรวจสอบว่าคัดลอกจากภายในโปรแกรมหรือไม่
+    if (isInternalClipboard(clipboardText)) {
+      executeEditorPaste(clipboardText, 'internal-paste');
       showToast('วางข้อความที่คัดลอกจากภายในสำเร็จ', 'success', 1500);
     } else {
       showToast('การวางถูกบล็อก: ไม่อนุญาตให้วางข้อความที่คัดลอกมาจากภายนอก', 'warning', 3500);
     }
   } catch (err) {
+    console.error('Failed to handle protected paste:', err);
     showToast('ไม่สามารถตรวจสอบคลิปบอร์ดได้', 'warning');
+  } finally {
+    setTimeout(() => {
+      isPasting = false;
+    }, 120);
   }
 }
 

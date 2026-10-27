@@ -52,6 +52,10 @@ contextBridge.exposeInMainWorld('pyknwAPI', {
   getAppVersion: () => ipcRenderer.invoke('app:get-version'),
   getPythonInfo: () => ipcRenderer.invoke('python:get-info'),
 
+  // Native Clipboard operations
+  readClipboard: () => ipcRenderer.invoke('clipboard:read-text'),
+  writeClipboard: (text) => ipcRenderer.invoke('clipboard:write-text', text),
+
   // Auto-Updater
   checkForUpdates: () => ipcRenderer.invoke('updater:check'),
   startUpdateDownload: (updateInfo) => ipcRenderer.invoke('updater:download', updateInfo),

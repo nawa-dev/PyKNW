@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, clipboard, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -170,6 +170,15 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(() => {
+    if (session && session.defaultSession) {
+      session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+        if (permission === 'clipboard-read' || permission === 'clipboard-sanitized-write') {
+          return callback(true);
+        }
+        callback(false);
+      });
+    }
+
     // Check initial command line argument for opened file
     const targetArg = process.argv.slice(app.isPackaged ? 1 : 2).find(arg => arg.endsWith('.pyknw') || arg.endsWith('.py'));
     if (targetArg && fs.existsSync(targetArg)) {
@@ -240,6 +249,26 @@ ipcMain.handle('app:get-info', () => {
 // IPC Handler: App Version
 ipcMain.handle('app:get-version', () => {
   return app.getVersion();
+});
+
+// IPC Handler: Native Clipboard Access
+ipcMain.handle('clipboard:read-text', () => {
+  try {
+    return clipboard.readText();
+  } catch (err) {
+    console.error('Failed to read native clipboard:', err);
+    return '';
+  }
+});
+
+ipcMain.handle('clipboard:write-text', (event, text) => {
+  try {
+    clipboard.writeText(typeof text === 'string' ? text : '');
+    return true;
+  } catch (err) {
+    console.error('Failed to write native clipboard:', err);
+    return false;
+  }
 });
 
 // IPC Handler: Python Info
