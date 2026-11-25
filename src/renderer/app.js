@@ -136,7 +136,13 @@ require(['vs/editor/editor.main'], function () {
     tabSize: 4,
     renderLineHighlight: 'all',
     bracketPairColorization: { enabled: true },
-    mouseWheelZoom: false // Handled directly by our unified zoom controller
+    mouseWheelZoom: false, // Handled directly by our unified zoom controller
+    unicodeHighlight: {
+      invisibleCharacters: true,
+      ambiguousCharacters: true,
+      includeComments: false,
+      includeStrings: false
+    }
   });
 
   // Track cursor position
@@ -152,6 +158,18 @@ require(['vs/editor/editor.main'], function () {
 
   // Setup Window Controls (Frameless Titlebar)
   setupWindowControls();
+
+  // Setup Editor Context Menu: Clean Stray Thai Marks
+  editor.addAction({
+    id: 'pyknw-clean-thai-marks',
+    label: 'ลบสระ/วรรณยุกต์ไทยที่มองไม่เห็น (Clean Stray Thai Marks)',
+    contextMenuGroupId: '1_modification',
+    contextMenuOrder: 1,
+    keybindings: [
+      monaco.KeyMod.Alt | monaco.KeyCode.KeyT
+    ],
+    run: () => cleanCurrentTabThaiMarks()
+  });
 
   // Setup Editor Context Menu (Right-Click Actions: Zoom In, Out, Reset)
   editor.addAction({
@@ -210,7 +228,16 @@ function createTab(title, content = '', filePath = null, isTampered = false, tam
     viewState: null,
     isDirty: false,
     isTampered: !!isTampered,
-    tamperedReason: tamperedReason || null
+    tamperedReason: tamperedReason || null,
+    thaiDecorationIds: []
+  };
+
+  let thaiCheckTimer = null;
+  const scheduleThaiCheck = () => {
+    if (thaiCheckTimer) clearTimeout(thaiCheckTimer);
+    thaiCheckTimer = setTimeout(() => {
+      checkStrayThaiMarksForTab(tab);
+    }, 120);
   };
 
   model.onDidChangeContent(() => {
@@ -219,7 +246,10 @@ function createTab(title, content = '', filePath = null, isTampered = false, tam
       tab.isDirty = true;
       renderTabs();
     }
+    scheduleThaiCheck();
   });
+
+  scheduleThaiCheck();
 
   tabs.push(tab);
   switchTab(tab.id);
@@ -241,6 +271,7 @@ function switchTab(tabId) {
   if (targetTab.viewState) {
     editor.restoreViewState(targetTab.viewState);
   }
+  checkStrayThaiMarksForTab(targetTab);
   editor.focus();
 
   renderTabs();
@@ -605,6 +636,206 @@ function updateZoomUI() {
     const percent = Math.round((currentFontSize / DEFAULT_FONT_SIZE) * 100);
     editorZoomEl.textContent = `${percent}%`;
   }
+}
+
+// ==========================================
+// Thai Stray / Invisible Mark Detection & Cleanup
+// ==========================================
+const THAI_CONSONANTS_REGEX = /[\u0E01-\u0E2E]/;
+
+const THAI_COMBINING_MARKS = {
+  '\u0E31': { name: 'ไม้หันอากาศ (ั)', hex: '0E31' },
+  '\u0E34': { name: 'สระอิ (ิ)', hex: '0E34' },
+  '\u0E35': { name: 'สระอี (ี)', hex: '0E35' },
+  '\u0E36': { name: 'สระอึ (ึ)', hex: '0E36' },
+  '\u0E37': { name: 'สระอือ (ื)', hex: '0E37' },
+  '\u0E38': { name: 'สระอุ (ุ)', hex: '0E38' },
+  '\u0E39': { name: 'สระอู (ู)', hex: '0E39' },
+  '\u0E3A': { name: 'พินทุ (ฺ)', hex: '0E3A' },
+  '\u0E47': { name: 'ไม้ไต่คู้ (็)', hex: '0E47' },
+  '\u0E48': { name: 'ไม้เอก (่)', hex: '0E48' },
+  '\u0E49': { name: 'ไม้โท (้)', hex: '0E49' },
+  '\u0E4A': { name: 'ไม้ตรี (๊)', hex: '0E4A' },
+  '\u0E4B': { name: 'ไม้จัตวา (๋)', hex: '0E4B' },
+  '\u0E4C': { name: 'ทัณฑฆาต/การันต์ (์)', hex: '0E4C' },
+  '\u0E4D': { name: 'นฤคหิต (ํ)', hex: '0E4D' },
+  '\u0E4E': { name: 'ยามักการ (๎)', hex: '0E4E' }
+};
+
+function scanStrayThaiMarks(code) {
+  if (!code || typeof code !== 'string') return [];
+  const results = [];
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let inTripleSingle = false;
+  let inTripleDouble = false;
+  let inComment = false;
+
+  let line = 1;
+  let col = 1;
+
+  for (let i = 0; i < code.length; i++) {
+    const ch = code[i];
+    const prev = i > 0 ? code[i - 1] : '';
+    const next1 = i + 1 < code.length ? code[i + 1] : '';
+    const next2 = i + 2 < code.length ? code[i + 2] : '';
+
+    if (ch === '\n') {
+      line++;
+      col = 1;
+      inComment = false;
+      if (!inTripleSingle && !inTripleDouble) {
+        inSingleQuote = false;
+        inDoubleQuote = false;
+      }
+      continue;
+    }
+
+    if (inComment) {
+      col++;
+      continue;
+    }
+
+    // String / comment tracking
+    if (!inSingleQuote && !inDoubleQuote && !inTripleSingle && !inTripleDouble) {
+      if (ch === '#') {
+        inComment = true;
+        col++;
+        continue;
+      }
+      if (ch === "'" && next1 === "'" && next2 === "'") {
+        inTripleSingle = true;
+        i += 2;
+        col += 3;
+        continue;
+      }
+      if (ch === '"' && next1 === '"' && next2 === '"') {
+        inTripleDouble = true;
+        i += 2;
+        col += 3;
+        continue;
+      }
+      if (ch === "'") {
+        inSingleQuote = true;
+        col++;
+        continue;
+      }
+      if (ch === '"') {
+        inDoubleQuote = true;
+        col++;
+        continue;
+      }
+    } else if (inSingleQuote && ch === "'" && prev !== '\\') {
+      inSingleQuote = false;
+      col++;
+      continue;
+    } else if (inDoubleQuote && ch === '"' && prev !== '\\') {
+      inDoubleQuote = false;
+      col++;
+      continue;
+    } else if (inTripleSingle && ch === "'" && next1 === "'" && next2 === "'") {
+      inTripleSingle = false;
+      i += 2;
+      col += 3;
+      continue;
+    } else if (inTripleDouble && ch === '"' && next1 === '"' && next2 === '"') {
+      inTripleDouble = false;
+      i += 2;
+      col += 3;
+      continue;
+    }
+
+    // Outside strings and comments
+    if (!inSingleQuote && !inDoubleQuote && !inTripleSingle && !inTripleDouble && !inComment) {
+      const markInfo = THAI_COMBINING_MARKS[ch];
+      if (markInfo) {
+        let valid = false;
+        if (THAI_CONSONANTS_REGEX.test(prev)) {
+          valid = true;
+        } else if (i > 1 && (prev === '\u0E34' || prev === '\u0E35' || prev === '\u0E36' || prev === '\u0E37' || prev === '\u0E31' || prev === '\u0E38' || prev === '\u0E39') && THAI_CONSONANTS_REGEX.test(code[i - 2])) {
+          valid = true;
+        }
+
+        if (!valid) {
+          results.push({
+            char: ch,
+            name: markInfo.name,
+            hex: markInfo.hex,
+            line: line,
+            col: col,
+            index: i
+          });
+        }
+      }
+    }
+    col++;
+  }
+  return results;
+}
+
+function checkStrayThaiMarksForTab(tab) {
+  if (!tab || !tab.model || tab.model.isDisposed()) return;
+  const model = tab.model;
+  const code = model.getValue();
+  const strayMarks = scanStrayThaiMarks(code);
+
+  // 1. Monaco Markers (Red wavy underline + hover tooltip)
+  const markers = strayMarks.map(mark => ({
+    severity: monaco.MarkerSeverity.Error,
+    message: `พบสระหรือวรรณยุกต์ภาษาไทยตกค้าง: '${mark.name}' (U+${mark.hex}) ซึ่งมองไม่เห็นใน Editor กรุณาลบออก หรือคลิกขวาเลือก 'ลบสระ/วรรณยุกต์ไทยที่มองไม่เห็น'`,
+    startLineNumber: mark.line,
+    startColumn: mark.col,
+    endLineNumber: mark.line,
+    endColumn: mark.col + 1
+  }));
+  monaco.editor.setModelMarkers(model, 'pyknw-thai-checker', markers);
+
+  // 2. Monaco Delta Decorations (Visual Badge [◌่] on zero-width character)
+  const newDecorations = strayMarks.map(mark => ({
+    range: new monaco.Range(mark.line, mark.col, mark.line, mark.col + 1),
+    options: {
+      inlineClassName: 'thai-stray-mark',
+      hoverMessage: {
+        value: `**[ข้อผิดพลาด]** พบสระหรือวรรณยุกต์ภาษาไทยตกค้าง: **${mark.name}** (\`U+${mark.hex}\`)\n\nอักขระนี้มองไม่เห็นใน Editor ทำให้โค้ดเกิดข้อผิดพลาด SyntaxError กรุณากดลบออก หรือคลิกขวาเลือก *"ลบสระ/วรรณยุกต์ไทยที่มองไม่เห็น"*`
+      },
+      overviewRuler: {
+        color: '#ef4444',
+        position: monaco.editor.OverviewRulerLane.Right
+      },
+      minimap: {
+        color: '#ef4444',
+        position: monaco.editor.MinimapPosition.Inline
+      }
+    }
+  }));
+
+  tab.thaiDecorationIds = model.deltaDecorations(tab.thaiDecorationIds || [], newDecorations);
+}
+
+function cleanCurrentTabThaiMarks() {
+  const currentTab = getCurrentTab();
+  if (!currentTab || !currentTab.model) return;
+  const model = currentTab.model;
+  const code = model.getValue();
+  const strayMarks = scanStrayThaiMarks(code);
+
+  if (strayMarks.length === 0) {
+    showToast('ไม่พบสระหรือวรรณยุกต์ไทยที่ตกค้างในไฟล์นี้', 'info', 2000);
+    return;
+  }
+
+  // Create edits in reverse order so character offsets/ranges remain valid
+  const edits = strayMarks.map(mark => ({
+    range: new monaco.Range(mark.line, mark.col, mark.line, mark.col + 1),
+    text: ''
+  }));
+
+  editor.pushUndoStop();
+  editor.executeEdits('clean-thai-marks', edits);
+  editor.pushUndoStop();
+
+  checkStrayThaiMarksForTab(currentTab);
+  showToast(`ลบสระ/วรรณยุกต์ไทยที่ตกค้างออกเรียบร้อยแล้ว (${strayMarks.length} จุด)`, 'success', 2500);
 }
 
 // ==========================================
@@ -973,6 +1204,11 @@ async function runCode() {
   }
 
   const code = currentTab.model.getValue();
+  const strayMarks = scanStrayThaiMarks(code);
+  if (strayMarks.length > 0) {
+    showToast(`ตรวจพบสระหรือวรรณยุกต์ไทยตกค้าง ${strayMarks.length} จุด กรุณาตรวจสอบตำแหน่งกรอบสีแดง [◌่] หรือคลิกขวาเพื่อลบออก`, 'warning', 4500);
+  }
+
   isRunning = true;
   
   // Enable interactive input field for python input()

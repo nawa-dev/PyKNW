@@ -629,6 +629,41 @@ html, body {
 }
 
 /* ==================================================== */
+/* Stray / Invisible Thai Mark Indicator                */
+/* ==================================================== */
+.thai-stray-mark {
+  background-color: rgba(239, 68, 68, 0.3) !important;
+  border: 1px dashed #ef4444 !important;
+  border-bottom: 2px wavy #ef4444 !important;
+  border-radius: 3px !important;
+  color: #fca5a5 !important;
+  display: inline-block !important;
+  min-width: 1.3ch !important;
+  padding: 0 1px !important;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.35) !important;
+}
+
+.thai-stray-mark::before {
+  content: '◌';
+  color: #ef4444;
+  font-weight: 700;
+  display: inline-block;
+  margin-right: 1px;
+}
+
+[data-theme="light"] .thai-stray-mark {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  border: 1px dashed #dc2626 !important;
+  border-bottom: 2px wavy #dc2626 !important;
+  color: #b91c1c !important;
+  box-shadow: 0 0 4px rgba(220, 38, 38, 0.25) !important;
+}
+
+[data-theme="light"] .thai-stray-mark::before {
+  color: #dc2626;
+}
+
+/* ==================================================== */
 /* Console / Terminal Section (Separate Panel)          */
 /* ==================================================== */
 .output-section {
