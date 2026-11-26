@@ -900,30 +900,39 @@ async function getSysClipboardText() {
   return '';
 }
 
+let isSelfPasting = false;
+
 function executeEditorPaste(text, editSource = 'internal-paste') {
   if (!editor) return;
-  const selection = editor.getSelection() || new monaco.Range(1, 1, 1, 1);
+  isSelfPasting = true;
+  try {
+    const selection = editor.getSelection() || new monaco.Range(1, 1, 1, 1);
 
-  editor.pushUndoStop();
-  editor.executeEdits(editSource, [{
-    range: selection,
-    text: text,
-    forceMoveMarkers: true
-  }]);
-  editor.pushUndoStop();
+    editor.pushUndoStop();
+    editor.executeEdits(editSource, [{
+      range: selection,
+      text: text,
+      forceMoveMarkers: true
+    }]);
+    editor.pushUndoStop();
 
-  // Move cursor to the end of the pasted text
-  const normalized = normalizeClipboardText(text);
-  const lines = normalized.split('\n');
-  const endLineNumber = selection.startLineNumber + lines.length - 1;
-  const endColumn = lines.length === 1
-    ? selection.startColumn + lines[0].length
-    : lines[lines.length - 1].length + 1;
+    // Move cursor to the end of the pasted text
+    const normalized = normalizeClipboardText(text);
+    const lines = normalized.split('\n');
+    const endLineNumber = selection.startLineNumber + lines.length - 1;
+    const endColumn = lines.length === 1
+      ? selection.startColumn + lines[0].length
+      : lines[lines.length - 1].length + 1;
 
-  const newSelection = new monaco.Selection(endLineNumber, endColumn, endLineNumber, endColumn);
-  editor.setSelection(newSelection);
-  editor.revealPosition(new monaco.Position(endLineNumber, endColumn));
-  editor.focus();
+    const newSelection = new monaco.Selection(endLineNumber, endColumn, endLineNumber, endColumn);
+    editor.setSelection(newSelection);
+    editor.revealPosition(new monaco.Position(endLineNumber, endColumn));
+    editor.focus();
+  } finally {
+    setTimeout(() => {
+      isSelfPasting = false;
+    }, 60);
+  }
 }
 
 function setupClipboardShield() {
@@ -940,12 +949,66 @@ function setupClipboardShield() {
   window.addEventListener('copy', captureWindowCopy, true);
   window.addEventListener('cut', captureWindowCopy, true);
 
-  // Monaco Keyboard interception
+  // 1. Monaco Action Interceptor: Catches right-click Context Menu "Paste" directly
+  if (editor && typeof editor.trigger === 'function') {
+    const originalTrigger = editor.trigger.bind(editor);
+    editor.trigger = function (source, handlerId, payload) {
+      if (handlerId === 'paste') {
+        const textToPaste = (payload && payload.text) || '';
+
+        // If paste was initiated by our own protected paste executor, pass through
+        if (isSelfPasting) {
+          return originalTrigger(source, handlerId, payload);
+        }
+
+        // Teacher Mode: allow external paste
+        if (isTeacherMode) {
+          if (textToPaste) registerInternalClipboard(textToPaste);
+          showToast('วางโค้ดจากภายนอกสำเร็จ (โหมดครูผู้สอน)', 'success', 1500);
+          return originalTrigger(source, handlerId, payload);
+        }
+
+        // Student Mode: check against internal clipboard
+        if (textToPaste && isInternalClipboard(textToPaste)) {
+          showToast('วางข้อความที่คัดลอกจากภายในสำเร็จ', 'success', 1500);
+          return originalTrigger(source, handlerId, payload);
+        } else {
+          showToast('การวางถูกบล็อก: ไม่อนุญาตให้วางข้อความที่คัดลอกมาจากภายนอก', 'warning', 3500);
+          return; // Cancel paste completely
+        }
+      }
+      return originalTrigger(source, handlerId, payload);
+    };
+  }
+
+  // 2. Monaco onDidPaste Fallback Watchdog (Guarantees zero leakage)
+  if (editor && typeof editor.onDidPaste === 'function') {
+    editor.onDidPaste((e) => {
+      if (isSelfPasting || isTeacherMode) return;
+      const model = editor.getModel();
+      if (!model) return;
+      const pastedText = model.getValueInRange(e.range);
+      if (!pastedText) return;
+
+      if (!isInternalClipboard(pastedText)) {
+        // Immediately undo/erase unauthorized external paste
+        editor.executeEdits('revert-unauthorized-paste', [{
+          range: e.range,
+          text: '',
+          forceMoveMarkers: true
+        }]);
+        showToast('การวางถูกบล็อก: ไม่อนุญาตให้วางข้อความที่คัดลอกมาจากภายนอก', 'warning', 3500);
+      }
+    });
+  }
+
+  // 3. Monaco Keyboard interception (Ctrl+C, Ctrl+X, Ctrl+V, Shift+Insert)
   editor.onKeyDown((e) => {
     const isCtrlOrCmd = e.ctrlKey || e.metaKey;
     const isKeyC = e.keyCode === monaco.KeyCode.KeyC || (e.browserEvent && e.browserEvent.code === 'KeyC');
     const isKeyX = e.keyCode === monaco.KeyCode.KeyX || (e.browserEvent && e.browserEvent.code === 'KeyX');
     const isKeyV = e.keyCode === monaco.KeyCode.KeyV || (e.browserEvent && e.browserEvent.code === 'KeyV');
+    const isShiftInsert = e.shiftKey && (e.keyCode === monaco.KeyCode.Insert || (e.browserEvent && e.browserEvent.code === 'Insert'));
 
     // Capture Copy (Ctrl+C) or Cut (Ctrl+X)
     if (isCtrlOrCmd && (isKeyC || isKeyX)) {
@@ -973,22 +1036,30 @@ function setupClipboardShield() {
       }, 25);
     }
 
-    // Capture Paste (Ctrl+V)
-    if (isCtrlOrCmd && isKeyV) {
+    // Capture Paste (Ctrl+V or Shift+Insert)
+    if ((isCtrlOrCmd && isKeyV) || isShiftInsert) {
       e.preventDefault();
       e.stopPropagation();
       handleProtectedPaste();
     }
   });
 
-  const container = document.getElementById('editorContainer');
-  container.addEventListener('paste', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    handleProtectedPaste();
-  }, true);
+  // 4. Capture native DOM paste events on window and container
+  const handleNativePasteEvent = (e) => {
+    if (editor && (editor.hasTextFocus() || editor.hasWidgetFocus() || document.activeElement?.closest('#editorContainer'))) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleProtectedPaste();
+    }
+  };
 
-  // Block External Drag & Drop (Unless Teacher Mode is on)
+  window.addEventListener('paste', handleNativePasteEvent, true);
+  const container = document.getElementById('editorContainer');
+  if (container) {
+    container.addEventListener('paste', handleNativePasteEvent, true);
+  }
+
+  // 5. Block External Drag & Drop (Unless Teacher Mode is on)
   window.addEventListener('dragover', (e) => {
     e.preventDefault();
     if (isTeacherMode) {
