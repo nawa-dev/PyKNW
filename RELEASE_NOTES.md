@@ -1,4 +1,4 @@
-# 📦 บันทึกการอัปเดต KNW-Py v1.2.2 (Release Notes)
+# 📦 บันทึกการอัปเดต KNW-Py v1.2.4 (Release Notes)
 
 ### ✨ สิ่งที่เพิ่มเข้ามาใหม่และแก้ไข (Updates & Improvements)
 
